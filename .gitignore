@@ -1,0 +1,43 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# CMake / build files
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# vcpkg generated files
+vcpkg_installed/
+
+# Compiled files
+*.exe
+*.dll
+*.lib
+*.obj
+*.o
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+bot_state.json
+trade_log.csv
+state/
