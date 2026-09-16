@@ -25,23 +25,38 @@ class BinanceWebSocketAdapter:
         self._thread = None
 
     def _on_message(self, ws, message):
-        data = json.loads(message)
-        # Binance @trade stream fields: 'p' = price, 'T' = trade time (ms), 'q' = quantity
-        tick = {
-            "price": float(data["p"]),
-            "timestamp": int(data["T"]),
-            "quantity": float(data["q"]),
-        }
-        if self.on_tick_callback:
-            self.on_tick_callback(tick)
+        try:
+            data = json.loads(message)
+            if not isinstance(data, dict):
+                return
+            # Verify required Binance @trade stream fields: 'p' (price) and 'T' (trade time ms)
+            if "p" not in data or "T" not in data:
+                return
+            tick = {
+                "price": float(data["p"]),
+                "timestamp": int(data["T"]),
+                "quantity": float(data.get("q", 0.0)),
+            }
+            if self.on_tick_callback:
+                try:
+                    self.on_tick_callback(tick)
+                except Exception as cb_err:
+                    print(f"[websocket] Warning: error in on_tick callback: {cb_err}")
+        except (json.JSONDecodeError, ValueError, TypeError) as parse_err:
+            # Silently ignore malformed non-JSON frames or heartbeats
+            pass
+        except Exception as unhandled:
+            print(f"[websocket] Unexpected message error: {unhandled}")
 
     def _on_error(self, ws, error):
-        print(f"WebSocket error: {error}")
+        print(f"[websocket] Stream error: {error}")
 
     def _on_close(self, ws, close_status_code, close_msg):
-        print("WebSocket connection closed.")
+        print(f"[websocket] Connection closed (code={close_status_code}, msg={close_msg})")
 
     def _run(self):
+        backoff_seconds = 2.0
+        max_backoff = 30.0
         while not self._stop_event.is_set():
             try:
                 self.ws = websocket.WebSocketApp(
@@ -51,11 +66,13 @@ class BinanceWebSocketAdapter:
                     on_close=self._on_close,
                 )
                 self.ws.run_forever(ping_interval=20, ping_timeout=10)
+                backoff_seconds = 2.0  # reset on clean run
             except Exception as error:
-                print(f"WebSocket runner exception: {error}")
+                print(f"[websocket] Runner exception: {error}")
             if not self._stop_event.is_set():
-                print("WebSocket disconnected. Reconnecting in 3 seconds...")
-                self._stop_event.wait(3.0)
+                print(f"[websocket] Disconnected. Reconnecting in {backoff_seconds:.1f}s...")
+                self._stop_event.wait(backoff_seconds)
+                backoff_seconds = min(backoff_seconds * 1.5, max_backoff)
 
     def start(self, on_tick):
         """

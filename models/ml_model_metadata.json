@@ -1,0 +1,71 @@
+{
+  "model_type": "RandomForestClassifier",
+  "symbol": "BTC/USDT",
+  "timeframe": "1h",
+  "trained_at": "2026-09-15T16:46:53.375605+00:00",
+  "horizon": 4,
+  "buy_threshold": 0.01,
+  "sell_threshold": -0.01,
+  "min_confidence": 0.48,
+  "stop_loss_pct": 0.015,
+  "take_profit_pct": 0.035,
+  "feature_names": [
+    "return_1",
+    "return_3",
+    "return_5",
+    "return_10",
+    "sma_10_ratio",
+    "sma_20_ratio",
+    "ema_9_ratio",
+    "ema_21_ratio",
+    "rsi_14",
+    "rsi_momentum",
+    "macd_ratio",
+    "macd_signal_ratio",
+    "macd_diff_ratio",
+    "atr_14_ratio",
+    "volatility_20",
+    "candle_range_pct",
+    "body_to_range",
+    "volume_change",
+    "hour",
+    "day_of_week"
+  ],
+  "sample_counts": {
+    "total_candles": 17520,
+    "train_samples": 12254,
+    "val_samples": 2626,
+    "test_samples": 2626
+  },
+  "validation_metrics": {
+    "accuracy": 0.5567402894135567,
+    "precision": 0.7209515872995585,
+    "f1": 0.6162538817913179,
+    "trading": {
+      "trade_count": 7,
+      "win_count": 4,
+      "loss_count": 3,
+      "win_rate_pct": 57.14,
+      "profit_factor": 2.7076,
+      "total_return_pct": 0.1546,
+      "max_drawdown_pct": 0.1093,
+      "sharpe_ratio": 1.9832
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.6584158415841584,
+    "precision": 0.7905436715178582,
+    "f1": 0.7126723032160859,
+    "trading": {
+      "trade_count": 15,
+      "win_count": 4,
+      "loss_count": 11,
+      "win_rate_pct": 26.67,
+      "profit_factor": 0.7377,
+      "total_return_pct": -0.1249,
+      "max_drawdown_pct": 0.2155,
+      "sharpe_ratio": -1.5083
+    }
+  },
+  "disclaimer": "This model is a research prototype. Machine learning predictions are probabilistic and do not guarantee profits. Past backtest results do not predict future performance."
+}

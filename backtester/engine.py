@@ -19,7 +19,8 @@ from core.strategy import Strategy, Signal, MarketData
 from core.risk_manager import RiskManager, RiskConfig
 
 
-FEE_RATE = 0.001  # 0.1% per trade (Binance taker)
+FEE_RATE = 0.001       # 0.1% per trade (Binance taker)
+SLIPPAGE_RATE = 0.0005  # 0.05% slippage
 
 
 @dataclass
@@ -31,6 +32,7 @@ class Trade:
     exit_time: int
     pnl: float        # net of fees
     fee: float
+    exit_reason: str = "signal"
 
 
 @dataclass
@@ -59,12 +61,14 @@ class BacktestEngine:
         self,
         starting_balance: float = 10_000.0,
         fee_rate: float = FEE_RATE,
+        slippage_pct: float = SLIPPAGE_RATE,
         risk_config: RiskConfig | None = None,
         symbol: str = "BTC/USDT",
         timeframe: str = "1m",
     ) -> None:
         self.starting_balance = starting_balance
         self.fee_rate = fee_rate
+        self.slippage_pct = slippage_pct
         self.risk_config = risk_config or RiskConfig(min_seconds_between_trades=0.0)
         self.symbol = symbol
         self.timeframe = timeframe
@@ -83,7 +87,56 @@ class BacktestEngine:
         position_size = 0.0
         unrealized_pnl = 0.0
 
+        # Optional strategy-level stop-loss & take-profit attributes
+        stop_loss_pct = getattr(strategy, "stop_loss", None)
+        take_profit_pct = getattr(strategy, "take_profit", None)
+
         for candle in candles:
+            # 1. Intraday Stop-Loss / Take-Profit check if position is open
+            if position_open:
+                sl_triggered = False
+                tp_triggered = False
+                exit_price = 0.0
+                exit_reason = "signal"
+
+                if stop_loss_pct is not None and stop_loss_pct > 0:
+                    sl_target = entry_price * (1.0 - stop_loss_pct)
+                    if candle.low <= sl_target:
+                        sl_triggered = True
+                        exit_price = sl_target * (1.0 - self.slippage_pct)
+                        exit_reason = "stop_loss"
+
+                if not sl_triggered and take_profit_pct is not None and take_profit_pct > 0:
+                    tp_target = entry_price * (1.0 + take_profit_pct)
+                    if candle.high >= tp_target:
+                        tp_triggered = True
+                        exit_price = tp_target * (1.0 - self.slippage_pct)
+                        exit_reason = "take_profit"
+
+                if sl_triggered or tp_triggered:
+                    gross_pnl = (exit_price - entry_price) * position_size
+                    exit_fee = exit_price * position_size * self.fee_rate
+                    net_pnl = gross_pnl - exit_fee
+                    balance += net_pnl
+                    risk.record_trade_result(net_pnl)
+                    risk.open_positions = max(0, risk.open_positions - 1)
+                    risk.mark_trade_executed()
+                    trades.append(Trade(
+                        entry_price=entry_price,
+                        exit_price=exit_price,
+                        size=position_size,
+                        entry_time=entry_time,
+                        exit_time=candle.timestamp,
+                        pnl=net_pnl,
+                        fee=exit_fee,
+                        exit_reason=exit_reason,
+                    ))
+                    position_open = False
+                    unrealized_pnl = 0.0
+                    if hasattr(strategy, "_position_open"):
+                        strategy._position_open = False
+
+            # 2. Strategy Signal evaluation
             signal = strategy.update(candle)
             price = candle.close
 
@@ -93,11 +146,12 @@ class BacktestEngine:
 
             # --- BUY ---
             if signal == Signal.BUY and not position_open and risk.can_open_position():
+                effective_buy_price = price * (1.0 + self.slippage_pct)
                 capital = risk.position_size()
                 fee = capital * self.fee_rate
                 capital_after_fee = capital - fee
-                position_size = capital_after_fee / price
-                entry_price = price
+                position_size = capital_after_fee / effective_buy_price
+                entry_price = effective_buy_price
                 entry_time = candle.timestamp
                 position_open = True
                 risk.open_positions += 1
@@ -106,13 +160,13 @@ class BacktestEngine:
 
             # --- CLOSE ---
             elif signal == Signal.CLOSE and position_open:
-                exit_price = price
+                exit_price = price * (1.0 - self.slippage_pct)
                 gross_pnl = (exit_price - entry_price) * position_size
                 exit_fee = exit_price * position_size * self.fee_rate
                 net_pnl = gross_pnl - exit_fee
                 balance += net_pnl
                 risk.record_trade_result(net_pnl)
-                risk.open_positions -= 1
+                risk.open_positions = max(0, risk.open_positions - 1)
                 risk.mark_trade_executed()
                 trades.append(Trade(
                     entry_price=entry_price,
@@ -122,6 +176,7 @@ class BacktestEngine:
                     exit_time=candle.timestamp,
                     pnl=net_pnl,
                     fee=exit_fee,
+                    exit_reason="signal",
                 ))
                 position_open = False
                 unrealized_pnl = 0.0
@@ -133,7 +188,7 @@ class BacktestEngine:
 
         # Force-close any open position at end of backtest
         if position_open and candles:
-            last_price = candles[-1].close
+            last_price = candles[-1].close * (1.0 - self.slippage_pct)
             gross_pnl = (last_price - entry_price) * position_size
             exit_fee = last_price * position_size * self.fee_rate
             net_pnl = gross_pnl - exit_fee
@@ -146,6 +201,7 @@ class BacktestEngine:
                 exit_time=candles[-1].timestamp,
                 pnl=net_pnl,
                 fee=exit_fee,
+                exit_reason="force_close",
             ))
 
         return BacktestResult(

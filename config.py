@@ -50,11 +50,11 @@ LOG_LIMIT: int = 10
 # ---------------------------------------------------------------------------
 SMA_SHORT: int = 9
 SMA_LONG: int = 21
-THRESHOLD_PCT: float = 0.08        # tick momentum threshold (%) — responsive to live price moves
+THRESHOLD_PCT: float = 0.25        # tick momentum threshold (%) — responsive to live price moves
 WINDOW_SIZE: int = 30              # tick momentum rolling window (ticks)
-TAKE_PROFIT_PCT: float = 0.08      # take profit target (%)
-STOP_LOSS_PCT: float = 0.08        # stop loss target (%)
-TRAILING_STOP_PCT: float = 0.04    # trailing profit protection (%)
+TAKE_PROFIT_PCT: float = 0.60      # take profit target (%) — comfortably exceeds 0.20% exchange fees
+STOP_LOSS_PCT: float = 0.30        # stop loss target (%)
+TRAILING_STOP_PCT: float = 0.20    # trailing profit protection (%)
 
 # ---------------------------------------------------------------------------
 # Risk parameters (defaults — RiskConfig also has its own defaults)
@@ -64,8 +64,8 @@ MIN_SECONDS_BETWEEN_TRADES: float = 15.0  # cooldown in seconds — prevents rap
 # ---------------------------------------------------------------------------
 # Execution
 # ---------------------------------------------------------------------------
-EXECUTION_MODE: str = "limit"           # "limit" (maker fees ~0.02%) or "market" (taker fee 0.10%)
-LIMIT_ORDER_TIMEOUT_SECONDS: float = 5.0  # seconds to wait for limit fill before falling back
+EXECUTION_MODE: str = os.environ.get("EXECUTION_MODE", "market")  # "market" for instant fills on testnet, or "limit"
+LIMIT_ORDER_TIMEOUT_SECONDS: float = 3.0  # seconds to wait for limit fill before falling back
 
 # ---------------------------------------------------------------------------
 # State persistence
@@ -94,6 +94,26 @@ DASHBOARD_PORT: int = 5000
 BACKTEST_STARTING_BALANCE: float = 10_000.0
 BACKTEST_FEE_RATE: float = 0.001   # 0.1% Binance taker fee
 BACKTEST_LIMIT: int = 1000         # number of candles to fetch for backtesting
+
+# ---------------------------------------------------------------------------
+# Machine Learning & Autonomous Trading Prototype
+# ---------------------------------------------------------------------------
+ML_MODEL_PATH: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "ml_model.joblib")
+ML_METADATA_PATH: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "model_metadata.json")
+ML_HISTORICAL_DATA_DIR: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "historical")
+ML_TIMEFRAME: str = os.environ.get("ML_TIMEFRAME", "5m")
+ML_SYMBOL: str = os.environ.get("ML_SYMBOL", "BTC/USDT")
+ML_LOOKAHEAD: int = int(os.environ.get("ML_LOOKAHEAD", "3"))
+ML_MIN_CONFIDENCE: float = float(os.environ.get("ML_MIN_CONFIDENCE", "0.40"))
+BUY_THRESHOLD: float = float(os.environ.get("BUY_THRESHOLD", "0.0015"))      # +0.15%
+SELL_THRESHOLD: float = float(os.environ.get("SELL_THRESHOLD", "-0.0015"))  # -0.15%
+STOP_LOSS: float = float(os.environ.get("STOP_LOSS", "0.015"))               # 1.5%
+TAKE_PROFIT: float = float(os.environ.get("TAKE_PROFIT", "0.025"))           # 2.5%
+RISK_PER_TRADE: float = float(os.environ.get("RISK_PER_TRADE", "0.01"))     # 1.0%
+SLIPPAGE: float = float(os.environ.get("SLIPPAGE", "0.0005"))               # 0.05%
+PAPER_TRADING: bool = os.environ.get("PAPER_TRADING", "true").lower() == "true"
+TRADING_MODE: str = os.environ.get("TRADING_MODE", "testnet")
+
 
 
 def validate_keys() -> bool:

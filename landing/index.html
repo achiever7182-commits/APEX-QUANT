@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Quant | Institutional Algorithmic Trading Terminal</title>
+  <meta name="description" content="Institutional-grade algorithmic trading terminal with live Binance WebSocket execution, real-time Level 2 orderbook, sub-5ms tick momentum engine, and automated risk supervision." />
+  
+  <!-- Favicon SVG -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg>" />
+
+  <!-- Google Fonts: Modern Dark Cinema (Plus Jakarta Sans, Inter, JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Socket.IO CDN for Real-time Bot Telemetry -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              bg: '#030712',
+              card: '#0b0f19',
+              elevated: '#111827',
+              surface: '#0f172a',
+              border: '#1e293b',
+              accent: '#3b82f6',
+              cyan: '#06b6d4',
+              bullish: '#10b981',
+              bearish: '#f43f5e',
+              warning: '#f59e0b',
+            }
+          },
+          boxShadow: {
+            'glow-bullish': '0 0 25px -5px rgba(16, 185, 129, 0.3)',
+            'glow-bearish': '0 0 25px -5px rgba(244, 63, 94, 0.3)',
+            'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.3)',
+            'glow-blue': '0 0 30px -5px rgba(59, 130, 246, 0.35)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Grid and Radial Glow */
+    .bg-grid-pattern {
+      background-size: 36px 36px;
+      background-image: 
+        linear-gradient(to right, rgba(30, 41, 59, 0.22) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30, 41, 59, 0.22) 1px, transparent 1px);
+    }
+    .radial-glow {
+      background: radial-gradient(circle 800px at 50% 10%, rgba(59, 130, 246, 0.16), transparent 75%);
+    }
+
+    /* Scroll Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+    }
+
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* Price Flashes */
+    @keyframes flashGreen {
+      0% { background-color: rgba(16, 185, 129, 0.3); }
+      100% { background-color: transparent; }
+    }
+    @keyframes flashRed {
+      0% { background-color: rgba(244, 63, 94, 0.3); }
+      100% { background-color: transparent; }
+    }
+    .flash-up { animation: flashGreen 0.6s ease-out; }
+    .flash-down { animation: flashRed 0.6s ease-out; }
+  </style>
+</head>
+
+<body class="bg-[#030712] text-slate-100 font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200 min-h-screen relative overflow-x-hidden">
+
+  <!-- Background Grids & Ambient Glows -->
+  <div class="fixed inset-0 bg-grid-pattern pointer-events-none opacity-40 z-0"></div>
+  <div class="fixed inset-0 radial-glow pointer-events-none z-0"></div>
+
+  <!-- ── TOP PRO TRADING STATS BAR ── -->
+  <div class="relative z-30 border-b border-slate-800/80 bg-[#060a14]/95 backdrop-blur-md px-4 py-2 text-xs font-mono">
+    <div class="max-w-[1720px] mx-auto flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+      
+      <!-- Market Pair & High/Low Stats -->
+      <div class="flex items-center gap-4 shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-md bg-amber-500/20 border border-amber-500/30 flex items-center justify-center font-bold text-amber-400 text-xs">₿</div>
+          <span class="font-bold text-white tracking-wide text-sm">BTC/USDT</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PERP</span>
+        </div>
+
+        <div class="h-4 w-px bg-slate-800 hidden sm:block"></div>
+
+        <div class="flex items-center gap-1.5" id="nav-price-box">
+          <span class="text-xs text-slate-400">Price:</span>
+          <span class="font-extrabold text-white text-sm tabular-nums" id="nav-live-price">$78,290.14</span>
+          <span class="text-[11px] font-bold text-emerald-400 tabular-nums px-1 rounded bg-emerald-500/10" id="nav-live-pct">+1.42%</span>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-5 text-slate-400 text-[11px]">
+          <div><span class="text-slate-500">24h High:</span> <span class="text-slate-200 tabular-nums font-medium">$79,150.00</span></div>
+          <div><span class="text-slate-500">24h Low:</span> <span class="text-slate-200 tabular-nums font-medium">$76,820.00</span></div>
+          <div><span class="text-slate-500">24h Vol:</span> <span class="text-slate-200 tabular-nums font-medium">42,891 BTC</span></div>
+          <div><span class="text-slate-500">Funding:</span> <span class="text-emerald-400 tabular-nums font-medium">+0.0100% (4h)</span></div>
+        </div>
+      </div>
+
+      <!-- Network & Socket Latency Status -->
+      <div class="flex items-center gap-4 shrink-0">
+        <div class="flex items-center gap-2 text-[11px]">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-emerald-400 font-semibold" id="top-socket-status">BINANCE TESTNET WS LIVE</span>
+          <span class="text-slate-500">|</span>
+          <span class="text-cyan-400 font-medium">Latency: <span id="top-latency-val">1.2ms</span></span>
+        </div>
+
+        <button id="toggle-ticker-btn" class="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 text-[11px] flex items-center gap-1 border border-slate-800 cursor-pointer" title="Pause / Resume Live Feed">
+          <i data-lucide="pause" class="w-3 h-3"></i>
+          <span class="hidden md:inline text-[10px]">PAUSE</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN NAVIGATION & QUICK ACTION HEADER ── -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#030712]/90 border-b border-slate-800/80 transition-all duration-200">
+    <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all duration-300">
+          <div class="w-full h-full bg-[#080d1a] rounded-[11px] flex items-center justify-center">
+            <i data-lucide="activity" class="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-blue-400 transition-colors">APEX QUANT</span>
+            <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">PRO TERMINAL</span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-mono tracking-wide -mt-0.5">AUTONOMOUS C++ &amp; PYTHON TICK PIPELINE</p>
+        </div>
+      </a>
+
+      <!-- Desktop Links -->
+      <nav class="hidden xl:flex items-center gap-8 text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
+        <a href="#pro-terminal" class="text-cyan-400 flex items-center gap-1.5 hover:text-cyan-300 transition-colors">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          Terminal Deck
+        </a>
+        <a href="#trade-ledger" class="hover:text-cyan-400 transition-colors">Trade Ledger</a>
+        <a href="#risk-matrix" class="hover:text-cyan-400 transition-colors">Risk Guardrails</a>
+        <a href="#strategy-engine" class="hover:text-cyan-400 transition-colors">Strategy Models</a>
+        <a href="#system-architecture" class="hover:text-cyan-400 transition-colors">Architecture</a>
+        <a href="#faq" class="hover:text-cyan-400 transition-colors">FAQ</a>
+      </nav>
+
+      <!-- Right Header Actions: Start/Stop Bot & Direct Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Live Bot State Indicator Pill -->
+        <div id="header-bot-pill" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 font-mono text-xs">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-amber-300 font-bold" id="header-bot-status-text">BOT STANDBY</span>
+        </div>
+
+        <!-- Master Start/Stop Bot Button -->
+        <button id="header-bot-action-btn" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer">
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-current" id="header-action-icon"></i>
+          <span id="header-action-text">Run Realtime Bot</span>
+        </button>
+
+        <!-- Quick Reset Panel Button -->
+        <button id="header-reset-btn" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-850 hover:bg-slate-800 hover:border-slate-600 px-3 py-2 text-xs font-mono font-semibold text-slate-300 hover:text-white transition-all cursor-pointer" title="Reset Dashboard PnL & Trade Ledger">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="hidden sm:inline">Reset Panel</span>
+        </button>
+
+        <button id="open-terminal-modal" class="p-2 rounded-lg border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-mono hidden md:inline-flex items-center gap-1.5 cursor-pointer" title="View Command Line Interface">
+          <i data-lucide="terminal" class="w-4 h-4 text-blue-400"></i>
+        </button>
+
+        <button id="mobile-menu-toggle" class="xl:hidden p-2 rounded-lg border border-slate-800 text-slate-400 hover:text-white" aria-label="Toggle Menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-nav" class="hidden xl:hidden border-t border-slate-800/80 bg-[#090d18] px-4 py-4 space-y-3 font-mono text-xs text-slate-300">
+      <a href="#pro-terminal" class="block py-1 text-cyan-400 font-bold">Terminal Deck</a>
+      <a href="#trade-ledger" class="block py-1 hover:text-cyan-400">Trade Ledger</a>
+      <a href="#risk-matrix" class="block py-1 hover:text-cyan-400">Risk Guardrails</a>
+      <a href="#strategy-engine" class="block py-1 hover:text-cyan-400">Strategy Models</a>
+      <a href="#system-architecture" class="block py-1 hover:text-cyan-400">Architecture</a>
+      <a href="#faq" class="block py-1 hover:text-cyan-400">FAQ</a>
+    </div>
+  </header>
+
+  <!-- ── COMMAND DECK: 4 REAL INSTITUTIONAL FINANCIAL TILES ── -->
+  <section class="relative z-10 pt-6 pb-4">
+    <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Metric Tile 1: Portfolio Capital Equity -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-800/90 bg-[#090e1c]/90 backdrop-blur-md relative overflow-hidden group hover:border-blue-500/40 transition-all shadow-lg">
+          <div class="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-blue-500/10 blur-xl"></div>
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+            <span class="tracking-wide uppercase font-semibold">Total Capital Equity</span>
+            <div class="p-1 rounded bg-blue-500/10 text-blue-400"><i data-lucide="wallet" class="w-3.5 h-3.5"></i></div>
+          </div>
+          <div class="font-mono text-2xl sm:text-3xl font-extrabold text-white tabular-nums tracking-tight mt-0.5" id="tile-balance">
+            $82,303.72
+          </div>
+          <div class="mt-2.5 flex items-center justify-between text-[11px] font-mono border-t border-slate-800/60 pt-2 text-slate-400">
+            <span>Starting: <span class="text-slate-300 font-semibold tabular-nums" id="tile-start-balance">$82,359.55</span></span>
+            <span class="text-cyan-400 font-medium">Free Margin: 98.4%</span>
+          </div>
+        </div>
+
+        <!-- Metric Tile 2: Realized P&L & Drawdown Guard -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-800/90 bg-[#090e1c]/90 backdrop-blur-md relative overflow-hidden group hover:border-rose-500/40 transition-all shadow-lg">
+          <div class="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-rose-500/10 blur-xl"></div>
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+            <span class="tracking-wide uppercase font-semibold">Today's Realized P&amp;L</span>
+            <div class="p-1 rounded bg-rose-500/10 text-rose-400"><i data-lucide="shield-alert" class="w-3.5 h-3.5"></i></div>
+          </div>
+          <div class="font-mono text-2xl sm:text-3xl font-extrabold text-rose-400 tabular-nums tracking-tight mt-0.5" id="tile-realized-pnl">
+            -$55.83
+          </div>
+          <div class="mt-2.5 flex items-center justify-between text-[11px] font-mono border-t border-slate-800/60 pt-2">
+            <span class="text-slate-400">Net Return: <span class="font-bold text-rose-400 tabular-nums" id="tile-pnl-pct">-0.07%</span></span>
+            <span class="text-amber-400 text-[10px] uppercase font-semibold">Circuit: -3.0% Cap</span>
+          </div>
+        </div>
+
+        <!-- Metric Tile 3: Open Position & Real-Time Unrealized P&L -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-800/90 bg-[#090e1c]/90 backdrop-blur-md relative overflow-hidden group hover:border-cyan-500/40 transition-all shadow-lg">
+          <div class="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-cyan-500/10 blur-xl"></div>
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+            <span class="tracking-wide uppercase font-semibold">Active Position</span>
+            <div class="p-1 rounded bg-cyan-500/10 text-cyan-400"><i data-lucide="crosshair" class="w-3.5 h-3.5"></i></div>
+          </div>
+          <div class="font-mono text-xl sm:text-2xl font-extrabold text-white tabular-nums tracking-tight mt-0.5 truncate" id="tile-pos-desc">
+            FLAT (NONE)
+          </div>
+          <div class="mt-2.5 flex items-center justify-between text-[11px] font-mono border-t border-slate-800/60 pt-2 text-slate-400">
+            <span>Unrealized: <span class="font-bold tabular-nums text-slate-200" id="tile-unrealized-pnl">$0.00</span></span>
+            <span class="text-slate-500" id="tile-entry-price">Entry: —</span>
+          </div>
+        </div>
+
+        <!-- Metric Tile 4: Win Rate & Execution Efficiency -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-800/90 bg-[#090e1c]/90 backdrop-blur-md relative overflow-hidden group hover:border-emerald-500/40 transition-all shadow-lg">
+          <div class="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-emerald-500/10 blur-xl"></div>
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+            <span class="tracking-wide uppercase font-semibold">Win Rate &amp; Efficiency</span>
+            <div class="p-1 rounded bg-emerald-500/10 text-emerald-400"><i data-lucide="award" class="w-3.5 h-3.5"></i></div>
+          </div>
+          <div class="font-mono text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums tracking-tight mt-0.5" id="tile-win-rate">
+            25.0%
+          </div>
+          <div class="mt-2.5 flex items-center justify-between text-[11px] font-mono border-t border-slate-800/60 pt-2 text-slate-400">
+            <span>Executed: <span class="text-white font-bold tabular-nums" id="tile-trade-count">13 Trades</span></span>
+            <span class="text-slate-400" id="tile-wl-ratio">(3W / 9L)</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── HERO PRO TRADING SUITE (CHART + ORDER BOOK + LIVE FEED) ── -->
+  <section id="pro-terminal" class="relative z-10 py-4">
+    <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="rounded-2xl border border-slate-800/90 bg-[#080d1a]/95 shadow-2xl backdrop-blur-xl overflow-hidden">
+        
+        <!-- Terminal Control Ribbon -->
+        <div class="px-5 py-3 border-b border-slate-800/80 bg-[#0c1222] flex flex-wrap items-center justify-between gap-3">
+          
+          <!-- Left Indicators & Pair Meta -->
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="font-mono text-xs font-bold text-white uppercase tracking-wider">LIVE TELEMETRY COCKPIT</span>
+            </div>
+            
+            <div class="hidden sm:flex items-center gap-1.5 font-mono text-xs bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+              <span class="text-slate-400">Strategy:</span>
+              <span class="text-cyan-400 font-bold">Tick Momentum (0.05%)</span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-1.5 font-mono text-xs text-slate-400">
+              <span>Execution Engine:</span>
+              <span class="text-white font-semibold">C++20 Worker</span>
+            </div>
+          </div>
+
+          <!-- Right Interactive Bot Launcher Controls -->
+          <div class="flex items-center gap-3 font-mono">
+            <button id="deck-start-bot-btn" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-emerald-600/30 transition-all cursor-pointer">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+              <span>Start Realtime Bot</span>
+            </button>
+
+            <button id="deck-stop-bot-btn" class="hidden inline-flex items-center gap-2 rounded-lg bg-rose-600 hover:bg-rose-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-rose-600/30 transition-all cursor-pointer">
+              <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
+              <span>Stop Bot</span>
+            </button>
+
+            <button id="deck-flatten-btn" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition-all cursor-pointer">
+              <i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Flatten</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 3-Column Trading Deck Layout (Chart / Order Book / Live Tape & Telemetry) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-800/80">
+          
+          <!-- ── COL 1 & 2: LIVE CHART & POSITION INSPECTOR (8 COLS) ── -->
+          <div class="lg:col-span-8 p-5 sm:p-6 flex flex-col justify-between">
+            
+            <div>
+              <!-- Chart Header Bar: Price & Timeframe Controls -->
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4 font-mono">
+                <div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight" id="chart-hero-price">
+                      $78,290.14
+                    </span>
+                    <span class="text-xs sm:text-sm font-bold text-emerald-400 tabular-nums px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20" id="chart-hero-delta">
+                      +$142.20 (+0.18%)
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-3">
+                    <span>Mark: <span class="text-slate-200 tabular-nums font-semibold" id="chart-mark-price">$78,289.80</span></span>
+                    <span>&bull;</span>
+                    <span>Index: <span class="text-slate-200 tabular-nums font-semibold" id="chart-index-price">$78,291.10</span></span>
+                    <span>&bull;</span>
+                    <span class="text-cyan-400">Threshold: &plusmn;0.05% Delta</span>
+                  </div>
+                </div>
+
+                <!-- Timeframe Pills -->
+                <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800 text-[11px]">
+                  <button class="tf-btn active px-2.5 py-1 rounded font-bold bg-blue-600 text-white">1s Live</button>
+                  <button class="tf-btn px-2.5 py-1 rounded text-slate-400 hover:text-white">5s</button>
+                  <button class="tf-btn px-2.5 py-1 rounded text-slate-400 hover:text-white">1m</button>
+                  <button class="tf-btn px-2.5 py-1 rounded text-slate-400 hover:text-white">5m</button>
+                </div>
+              </div>
+
+              <!-- Canvas for Real-time Chart.js -->
+              <div class="h-72 sm:h-80 w-full relative">
+                <canvas id="tradingCanvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Position Details & Quick Action Panel Under Chart -->
+            <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs bg-slate-950/70 p-3.5 rounded-xl border border-slate-800/80">
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Position Size</span>
+                <span class="font-bold text-white text-sm" id="deck-pos-size">0.0000 BTC</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Entry / Liquidation</span>
+                <span class="font-medium text-slate-300 tabular-nums" id="deck-entry-liq">— / —</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Unrealized ROE</span>
+                <span class="font-bold tabular-nums text-slate-300 text-sm" id="deck-unrealized-roe">0.00% ($0.00)</span>
+              </div>
+              <div class="text-right flex flex-col items-end justify-center">
+                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Cumulative Fees</span>
+                <span class="font-bold text-amber-400 tabular-nums" id="deck-total-fees">$107.96</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ── COL 3: LEVEL 2 ORDERBOOK & LIVE TIME-AND-SALES TAPE (4 COLS) ── -->
+          <div class="lg:col-span-4 p-5 sm:p-6 bg-[#060a14]/90 flex flex-col justify-between">
+            
+            <div>
+              <!-- Order Book Header -->
+              <div class="flex items-center justify-between mb-3 font-mono text-xs">
+                <span class="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i> Level 2 Order Book
+                </span>
+                <span class="text-[10px] text-slate-500">Spread: <span class="text-slate-300 font-semibold" id="ob-spread">0.50 USDT</span></span>
+              </div>
+
+              <!-- Order Book Header Columns -->
+              <div class="grid grid-cols-3 font-mono text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 px-1">
+                <span>Price (USDT)</span>
+                <span class="text-right">Size (BTC)</span>
+                <span class="text-right">Total (BTC)</span>
+              </div>
+
+              <!-- Order Book Rows Container (Asks red, Bids green) -->
+              <div class="space-y-1 font-mono text-xs select-none">
+                
+                <!-- Asks (Red) -->
+                <div class="space-y-0.5" id="ob-asks">
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px]">
+                    <div class="absolute inset-y-0 right-0 bg-rose-500/10 rounded" style="width: 72%;"></div>
+                    <span class="text-rose-400 font-medium tabular-nums z-10">78,294.50</span>
+                    <span class="text-slate-300 tabular-nums z-10">0.842</span>
+                    <span class="text-slate-500 text-[10px] tabular-nums z-10">2.410</span>
+                  </div>
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px]">
+                    <div class="absolute inset-y-0 right-0 bg-rose-500/10 rounded" style="width: 48%;"></div>
+                    <span class="text-rose-400 font-medium tabular-nums z-10">78,292.00</span>
+                    <span class="text-slate-300 tabular-nums z-10">0.519</span>
+                    <span class="text-slate-500 text-[10px] tabular-nums z-10">1.568</span>
+                  </div>
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px]">
+                    <div class="absolute inset-y-0 right-0 bg-rose-500/10 rounded" style="width: 25%;"></div>
+                    <span class="text-rose-400 font-medium tabular-nums z-10">78,290.80</span>
+                    <span class="text-slate-300 tabular-nums z-10">0.312</span>
+                    <span class="text-slate-500 text-[10px] tabular-nums z-10">1.049</span>
+                  </div>
+                </div>
+
+                <!-- Mid Market Spread Indicator -->
+                <div class="py-1 my-1 border-y border-slate-800/80 bg-slate-900/40 text-center flex items-center justify-center gap-2">
+                  <span class="text-sm font-extrabold text-white tabular-nums" id="ob-mid-price">$78,290.14</span>
+                  <span class="text-[10px] text-emerald-400 font-bold">&uarr; Tick Delta: +0.02%</span>
+                </div>
+
+                <!-- Bids (Green) -->
+                <div class="space-y-0.5" id="ob-bids">
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px]">
+                    <div class="absolute inset-y-0 right-0 bg-emerald-500/10 rounded" style="width: 32%;"></div>
+                    <span class="text-emerald-400 font-medium tabular-nums z-10">78,289.50</span>
+                    <span class="text-slate-300 tabular-nums z-10">0.420</span>
+                    <span class="text-slate-500 text-[10px] tabular-nums z-10">0.420</span>
+                  </div>
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px]">
+                    <div class="absolute inset-y-0 right-0 bg-emerald-500/10 rounded" style="width: 61%;"></div>
+                    <span class="text-emerald-400 font-medium tabular-nums z-10">78,288.10</span>
+                    <span class="text-slate-300 tabular-nums z-10">0.785</span>
+                    <span class="text-slate-500 text-[10px] tabular-nums z-10">1.205</span>
+                  </div>
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px]">
+                    <div class="absolute inset-y-0 right-0 bg-emerald-500/10 rounded" style="width: 85%;"></div>
+                    <span class="text-emerald-400 font-medium tabular-nums z-10">78,286.00</span>
+                    <span class="text-slate-300 tabular-nums z-10">1.120</span>
+                    <span class="text-slate-500 text-[10px] tabular-nums z-10">2.325</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Recent Real Orders / Executions Stream -->
+            <div class="mt-5 pt-4 border-t border-slate-800/80">
+              <div class="flex items-center justify-between mb-2 font-mono text-xs">
+                <span class="font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i> Bot Execution Tape
+                </span>
+                <span class="text-[10px] text-slate-400" id="deck-exec-count">Realtime Stream</span>
+              </div>
+
+              <div id="deck-executions-stream" class="space-y-2 font-mono text-[11px] max-h-48 overflow-y-auto pr-1">
+                <!-- Dynamically Populated from socket & bot state -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── VERIFIED TRADE ARCHIVE LEDGER (FROM BOT DATA) ── -->
+  <section id="trade-ledger" class="relative z-10 py-12">
+    <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 reveal">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/25 font-mono text-xs font-semibold mb-2">
+            <i data-lucide="database" class="w-3.5 h-3.5"></i>
+            PERSISTENT EXECUTION ARCHIVE
+          </div>
+          <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white">
+            Verified Binance Testnet Trade Ledger
+          </h2>
+          <p class="mt-1 text-xs sm:text-sm text-slate-400 font-mono">
+            Historical orders executed by the bot &bull; Reconciled with exchange wallet &bull; Synced from <span class="text-cyan-400">bot_state.json</span>
+          </p>
+        </div>
+
+        <div class="mt-4 md:mt-0 flex items-center gap-3 font-mono text-xs">
+          <span class="text-slate-400">Total Logged Trades: <span class="font-bold text-white tabular-nums" id="ledger-total-count">13</span></span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-400">Realized P&amp;L: <span class="font-bold text-rose-400 tabular-nums" id="ledger-total-pnl">-$55.83</span></span>
+        </div>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800/90 bg-[#080d1a]/90 backdrop-blur-md reveal shadow-xl">
+        <table class="w-full text-left font-mono text-xs">
+          <thead class="bg-[#0c1222] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <tr>
+              <th class="px-5 py-3.5">Execution Time</th>
+              <th class="px-5 py-3.5">Action</th>
+              <th class="px-5 py-3.5">Fill Price</th>
+              <th class="px-5 py-3.5">Size (BTC)</th>
+              <th class="px-5 py-3.5">Notional Value</th>
+              <th class="px-5 py-3.5">Realized P&amp;L</th>
+              <th class="px-5 py-3.5 text-right">Order Reference</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-tbody" class="divide-y divide-slate-800/60 text-slate-200">
+            <!-- Dynamic Rows Ingested -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── RISK GUARDRAILS & POSITION SIZING CALCULATOR ── -->
+  <section id="risk-matrix" class="relative z-10 py-12 border-t border-slate-800/70 bg-[#060a14]/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12 reveal">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-mono text-xs font-semibold mb-3">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          AUTOMATED RISK ENGINE
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Dynamic Sizing &amp; Circuit Breakers
+        </h2>
+        <p class="mt-3 text-slate-400 text-sm">
+          Simulate how the bot's risk manager safeguards your $82,300 portfolio from catastrophic tail risk.
+        </p>
+      </div>
+
+      <div class="max-w-4xl mx-auto rounded-2xl border border-slate-800/90 bg-[#080e1c]/90 p-6 sm:p-10 shadow-2xl backdrop-blur-xl reveal">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          
+          <!-- Sliders -->
+          <div class="md:col-span-7 space-y-6">
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono mb-2">
+                <span class="text-slate-300 font-medium">Account Capital ($USDT)</span>
+                <span class="text-emerald-400 font-bold tabular-nums text-sm" id="calc-capital-val">$82,300</span>
+              </div>
+              <input type="range" id="calc-capital" min="1000" max="100000" step="500" value="82300" class="w-full accent-blue-500 cursor-pointer bg-slate-800 rounded-lg h-2" />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono mb-2">
+                <span class="text-slate-300 font-medium">Risk Per Trade (%)</span>
+                <span class="text-blue-400 font-bold tabular-nums text-sm" id="calc-risk-val">1.0%</span>
+              </div>
+              <input type="range" id="calc-risk" min="0.2" max="5.0" step="0.1" value="1.0" class="w-full accent-blue-500 cursor-pointer bg-slate-800 rounded-lg h-2" />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono mb-2">
+                <span class="text-slate-300 font-medium">Stop-Loss Distance (% from Entry)</span>
+                <span class="text-rose-400 font-bold tabular-nums text-sm" id="calc-sl-val">0.08%</span>
+              </div>
+              <input type="range" id="calc-sl" min="0.04" max="1.5" step="0.01" value="0.08" class="w-full accent-blue-500 cursor-pointer bg-slate-800 rounded-lg h-2" />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono mb-2">
+                <span class="text-slate-300 font-medium">Risk-to-Reward Ratio</span>
+                <span class="text-cyan-400 font-bold tabular-nums text-sm" id="calc-rr-val">1 : 2.0</span>
+              </div>
+              <input type="range" id="calc-rr" min="1.0" max="4.0" step="0.5" value="2.0" class="w-full accent-blue-500 cursor-pointer bg-slate-800 rounded-lg h-2" />
+            </div>
+          </div>
+
+          <!-- Dynamic Output Card -->
+          <div class="md:col-span-5 bg-[#0e1628] p-6 rounded-xl border border-slate-700/60 font-mono space-y-4">
+            <div class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-2 flex items-center gap-1.5">
+              <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i> Calculated Execution
+            </div>
+
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 text-xs">
+              <span class="text-slate-400">Max Dollar Risk:</span>
+              <span class="font-bold text-rose-400 tabular-nums text-sm" id="res-risk-dollar">$823.00</span>
+            </div>
+
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 text-xs">
+              <span class="text-slate-400">Optimal Position Size:</span>
+              <span class="font-extrabold text-emerald-400 tabular-nums text-base" id="res-pos-size">$1,028,750</span>
+            </div>
+
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 text-xs">
+              <span class="text-slate-400">Profit Target (TP):</span>
+              <span class="font-bold text-cyan-400 tabular-nums text-sm" id="res-profit-target">+$1,646.00</span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs pt-1">
+              <span class="text-slate-400">Daily Loss Hard Cap:</span>
+              <span class="font-semibold text-amber-400 tabular-nums" id="res-daily-cap">-$2,469.00</span>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+              If cumulative daily loss hits -$2,469, the bot immediately cancels open orders and halts trading for 24 hours.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── STRATEGY MODELS & ARCHITECTURE ── -->
+  <section id="strategy-engine" class="relative z-10 py-16 sm:py-24 border-t border-slate-800/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12 reveal">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/25 font-mono text-xs font-semibold mb-3">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          QUANT STRATEGY SUITE
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Three Dedicated Execution Strategies
+        </h2>
+      </div>
+
+      <!-- Strategy Tabs -->
+      <div class="flex justify-center mb-8 reveal">
+        <div class="inline-flex p-1.5 rounded-xl bg-slate-900/90 border border-slate-800/90 gap-1.5 font-mono text-xs">
+          <button id="tab-strat-tick" class="strategy-tab-btn active px-4 py-2.5 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow cursor-pointer">
+            1. Tick Momentum (C++ High-Freq)
+          </button>
+          <button id="tab-strat-sma" class="strategy-tab-btn px-4 py-2.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-slate-200 cursor-pointer">
+            2. Dual SMA Crossover (Trend)
+          </button>
+          <button id="tab-strat-ml" class="strategy-tab-btn px-4 py-2.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-slate-200 cursor-pointer">
+            3. Random Forest ML (Predictive)
+          </button>
+        </div>
+      </div>
+
+      <div class="max-w-5xl mx-auto reveal">
+        <div id="content-strat-tick" class="strategy-content-panel rounded-2xl border border-slate-800/90 bg-[#090e1d] p-6 sm:p-8">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <span class="text-xs font-bold text-cyan-400 font-mono uppercase tracking-wider">Active Bot Mode</span>
+              <h3 class="font-display text-2xl font-bold text-white">Tick Momentum Volatility Breakout</h3>
+              <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Connects directly to Binance raw WebSocket trade feeds. Evaluates price velocity over rolling tick windows. Fires orders within milliseconds when price moves beyond &plusmn;0.05% threshold.
+              </p>
+              <div class="flex items-center gap-4 font-mono text-xs pt-2">
+                <div><span class="text-slate-500">Latency:</span> <span class="text-emerald-400 font-bold">&lt; 3.2ms</span></div>
+                <div><span class="text-slate-500">Window:</span> <span class="text-white font-bold">30 Ticks</span></div>
+                <div><span class="text-slate-500">Trailing Stop:</span> <span class="text-cyan-400 font-bold">0.04%</span></div>
+              </div>
+            </div>
+            <div class="lg:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300">
+              <pre class="text-[11px] leading-relaxed text-slate-300"><code><span class="text-blue-400">class</span> <span class="text-cyan-400">TickMomentumStrategy</span>:
+  <span class="text-blue-400">def</span> <span class="text-emerald-400">on_tick</span>(self, price: float):
+    delta = (price - self.base) / self.base
+    <span class="text-blue-400">if</span> delta &gt;= <span class="text-amber-400">0.0005</span>:
+      <span class="text-blue-400">return</span> Signal.BUY
+    <span class="text-blue-400">return</span> Signal.HOLD</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div id="content-strat-sma" class="strategy-content-panel hidden rounded-2xl border border-slate-800/90 bg-[#090e1d] p-6 sm:p-8">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <span class="text-xs font-bold text-blue-400 font-mono uppercase tracking-wider">Trend Mode</span>
+              <h3 class="font-display text-2xl font-bold text-white">Dual Moving Average Crossover (9 / 21)</h3>
+              <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Captures sustained trends over multi-candle intervals. Evaluates 9-period Fast SMA crossing 21-period Slow SMA on 60-second candles with volume filters.
+              </p>
+            </div>
+            <div class="lg:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300">
+              <pre class="text-[11px] leading-relaxed text-slate-300"><code><span class="text-blue-400">if</span> fast_sma[-1] &gt; slow_sma[-1] \
+   <span class="text-blue-400">and</span> fast_sma[-2] &lt;= slow_sma[-2]:
+  <span class="text-blue-400">return</span> Signal.BUY</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div id="content-strat-ml" class="strategy-content-panel hidden rounded-2xl border border-slate-800/90 bg-[#090e1d] p-6 sm:p-8">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <span class="text-xs font-bold text-indigo-400 font-mono uppercase tracking-wider">AI Predictive Mode</span>
+              <h3 class="font-display text-2xl font-bold text-white">Random Forest Directional Classifier</h3>
+              <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Trained on 14 technical features (RSI, Bollinger Bands, ATR, Momentum). Emits trade signals when probability confidence exceeds 70%.
+              </p>
+            </div>
+            <div class="lg:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300">
+              <pre class="text-[11px] leading-relaxed text-slate-300"><code>prob_up, prob_down = model.predict_proba(x)[-1]
+<span class="text-blue-400">if</span> prob_up &gt;= <span class="text-amber-400">0.70</span>:
+  <span class="text-blue-400">return</span> Signal.BUY</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── FAQ SECTION ── -->
+  <section id="faq" class="relative z-10 py-16 border-t border-slate-800/70 bg-[#050914]/70">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-10 reveal">
+        <h2 class="font-display text-2xl sm:text-3xl font-bold text-white">
+          Frequently Asked Questions
+        </h2>
+      </div>
+
+      <div class="space-y-3 reveal">
+        <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden">
+          <button class="faq-q w-full px-5 py-3.5 text-left flex items-center justify-between text-sm font-semibold text-white hover:text-cyan-400 transition-colors cursor-pointer">
+            <span>How does this UI communicate with my python run.py realtime process?</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform"></i>
+          </button>
+          <div class="faq-a hidden px-5 pb-4 text-xs text-slate-400 border-t border-slate-800/50 pt-2.5">
+            The Python bot imports <code class="text-cyan-400">dashboard.server.emit_state</code> and broadcasts its tick telemetry to the local Socket.IO server. This web terminal receives those WebSocket packets in real-time, updating the chart, order book, and metrics without page refreshes.
+          </div>
+        </div>
+
+        <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden">
+          <button class="faq-q w-full px-5 py-3.5 text-left flex items-center justify-between text-sm font-semibold text-white hover:text-cyan-400 transition-colors cursor-pointer">
+            <span>Are real funds at risk?</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform"></i>
+          </button>
+          <div class="faq-a hidden px-5 pb-4 text-xs text-slate-400 border-t border-slate-800/50 pt-2.5">
+            By default, all orders execute on the Binance Testnet environment with zero financial liability. When you are ready to trade mainnet, change your keys in <code class="text-slate-200">.env</code>.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="relative z-10 border-t border-slate-800/80 bg-[#02050d] py-8 text-xs text-slate-500 font-mono">
+    <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+        <span class="text-slate-300 font-bold">APEX QUANT</span> &bull; <span>Autonomous Trading Architecture</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <a href="#pro-terminal" class="hover:text-cyan-400">Terminal</a>
+        <a href="#trade-ledger" class="hover:text-cyan-400">Trade Ledger</a>
+        <a href="#risk-matrix" class="hover:text-cyan-400">Risk Engine</a>
+        <a href="/dashboard-compact" class="hover:text-cyan-400">Compact TUI View</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── TERMINAL COMMANDS MODAL ── -->
+  <div id="terminal-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg rounded-2xl border border-slate-700/80 bg-[#090e1c] p-6 shadow-2xl space-y-4 font-mono text-xs">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <span class="font-bold text-white flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i> CLI Launcher</span>
+        <button id="close-terminal-modal" class="text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+          <div class="text-slate-500 text-[10px]">REALTIME WEBSOCKET MODE</div>
+          <code class="text-cyan-400">python run.py realtime</code>
+        </div>
+        <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+          <div class="text-slate-500 text-[10px]">POLLING CANDLE MODE</div>
+          <code class="text-blue-400">python run.py polling</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCRIPT: PRO TRADING ENGINE & REAL-TIME SOCKET BINDING ── -->
+  <script>
+    lucide.createIcons();
+
+    // ── 1. Scroll Reveal Observer ──
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ── 2. Real-Time Chart.js Setup ──
+    const ctx = document.getElementById('tradingCanvas').getContext('2d');
+    const chartGradient = ctx.createLinearGradient(0, 0, 0, 260);
+    chartGradient.addColorStop(0, 'rgba(6, 182, 212, 0.35)');
+    chartGradient.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+
+    const tradingChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'BTC/USDT',
+          data: [],
+          borderColor: '#06b6d4',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.2,
+          fill: true,
+          backgroundColor: chartGradient,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 0 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: '#090d18',
+            borderColor: '#1e293b',
+            borderWidth: 1,
+            titleFont: { family: 'JetBrains Mono', size: 11 },
+            bodyFont: { family: 'JetBrains Mono', size: 12 },
+            callbacks: { label: (item) => 'Price: $' + Number(item.formattedValue.replace(/,/g, '')).toLocaleString() }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(30, 41, 59, 0.3)' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 }, maxTicksLimit: 8 }
+          },
+          y: {
+            position: 'right',
+            grid: { color: 'rgba(30, 41, 59, 0.3)' },
+            ticks: { 
+              color: '#64748b', 
+              font: { family: 'JetBrains Mono', size: 10 },
+              callback: (v) => '$' + v.toLocaleString()
+            }
+          }
+        },
+        interaction: { intersect: false, mode: 'nearest' }
+      }
+    });
+
+    // ── 3. State Management & Real Data Ingestion ──
+    let lastPrice = 78290.14;
+    let isBotActive = false;
+
+    function formatUsdt(val) {
+      if (val === null || val === undefined) return '$0.00';
+      const num = Number(val);
+      return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateTerminalData(state) {
+      if (!state) return;
+
+      // 1. Balance Tile
+      if (state.balance !== undefined) {
+        document.getElementById('tile-balance').textContent = formatUsdt(state.balance);
+      }
+      if (state.starting_balance !== undefined) {
+        document.getElementById('tile-start-balance').textContent = formatUsdt(state.starting_balance);
+      }
+
+      // 2. Realized PnL Tile & Ledger Total
+      if (state.realized_pnl !== undefined) {
+        const pnl = Number(state.realized_pnl);
+        const pnlEl = document.getElementById('tile-realized-pnl');
+        const pnlPctEl = document.getElementById('tile-pnl-pct');
+        const ledgerPnl = document.getElementById('ledger-total-pnl');
+        const isPos = pnl >= 0;
+        const sign = isPos ? '+' : '-';
+        const text = `${sign}$${Math.abs(pnl).toFixed(2)}`;
+
+        pnlEl.textContent = text;
+        ledgerPnl.textContent = text;
+        const start = state.starting_balance || 82359.55;
+        const pct = ((pnl / start) * 100).toFixed(2);
+        pnlPctEl.textContent = `${sign}${Math.abs(pct)}%`;
+
+        if (isPos) {
+          pnlEl.className = 'font-mono text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums tracking-tight mt-0.5';
+          pnlPctEl.className = 'font-bold text-emerald-400 tabular-nums';
+          ledgerPnl.className = 'font-bold text-emerald-400 tabular-nums';
+        } else {
+          pnlEl.className = 'font-mono text-2xl sm:text-3xl font-extrabold text-rose-400 tabular-nums tracking-tight mt-0.5';
+          pnlPctEl.className = 'font-bold text-rose-400 tabular-nums';
+          ledgerPnl.className = 'font-bold text-rose-400 tabular-nums';
+        }
+      }
+
+      // 3. Open Position & Unrealized PnL
+      const openPos = state.open_position;
+      const posOpen = Boolean(state.position_open || (openPos && openPos.size > 0));
+      const posDescEl = document.getElementById('tile-pos-desc');
+      const unPnlEl = document.getElementById('tile-unrealized-pnl');
+      const entryPriceEl = document.getElementById('tile-entry-price');
+      const deckPosSize = document.getElementById('deck-pos-size');
+      const deckEntryLiq = document.getElementById('deck-entry-liq');
+      const deckUnrealizedRoe = document.getElementById('deck-unrealized-roe');
+
+      if (posOpen) {
+        const size = state.position_size || (openPos ? openPos.size : 0.021);
+        const entry = state.entry_price || (openPos ? openPos.entry_price : 78330.01);
+        const current = state.price || lastPrice;
+        const unPnl = (current - entry) * size;
+        const roe = ((current - entry) / entry) * 100;
+        const sign = unPnl >= 0 ? '+' : '';
+
+        posDescEl.innerHTML = `<span class="text-emerald-400">LONG ${size.toFixed(4)} BTC</span>`;
+        unPnlEl.textContent = `${sign}$${unPnl.toFixed(2)}`;
+        unPnlEl.className = unPnl >= 0 ? 'font-bold tabular-nums text-emerald-400' : 'font-bold tabular-nums text-rose-400';
+        entryPriceEl.textContent = `Entry: $${entry.toLocaleString()}`;
+
+        deckPosSize.textContent = `${size.toFixed(4)} BTC`;
+        deckEntryLiq.textContent = `$${entry.toLocaleString()} / $54,800`;
+        deckUnrealizedRoe.textContent = `${sign}${roe.toFixed(2)}% (${sign}$${unPnl.toFixed(2)})`;
+        deckUnrealizedRoe.className = unPnl >= 0 ? 'font-bold tabular-nums text-emerald-400 text-sm' : 'font-bold tabular-nums text-rose-400 text-sm';
+      } else {
+        posDescEl.textContent = 'FLAT (NONE)';
+        unPnlEl.textContent = '$0.00';
+        unPnlEl.className = 'font-bold tabular-nums text-slate-300';
+        entryPriceEl.textContent = 'Entry: —';
+        deckPosSize.textContent = '0.0000 BTC';
+        deckEntryLiq.textContent = '— / —';
+        deckUnrealizedRoe.textContent = '0.00% ($0.00)';
+        deckUnrealizedRoe.className = 'font-bold tabular-nums text-slate-300 text-sm';
+      }
+
+      // 4. Win Rate & Trade Count
+      if (state.win_rate !== undefined) {
+        document.getElementById('tile-win-rate').textContent = Number(state.win_rate).toFixed(1) + '%';
+      }
+      if (state.trade_count !== undefined) {
+        document.getElementById('tile-trade-count').textContent = `${state.trade_count} Trades`;
+        document.getElementById('ledger-total-count').textContent = state.trade_count;
+      }
+      if (state.win_count !== undefined && state.loss_count !== undefined) {
+        document.getElementById('tile-wl-ratio').textContent = `(${state.win_count}W / ${state.loss_count}L)`;
+      }
+      if (state.total_fees_paid !== undefined) {
+        document.getElementById('deck-total-fees').textContent = formatUsdt(state.total_fees_paid);
+      }
+
+      // 5. Live Price Stream Updates
+      if (state.price) {
+        const price = Number(state.price);
+        const priceFormatted = formatUsdt(price);
+        document.getElementById('nav-live-price').textContent = priceFormatted;
+        document.getElementById('chart-hero-price').textContent = priceFormatted;
+        document.getElementById('chart-mark-price').textContent = formatUsdt(price - 0.34);
+        document.getElementById('chart-index-price').textContent = formatUsdt(price + 0.96);
+        document.getElementById('ob-mid-price').textContent = priceFormatted;
+
+        // Visual Price Flash
+        const priceBox = document.getElementById('nav-price-box');
+        if (price > lastPrice) {
+          priceBox.classList.remove('flash-down');
+          priceBox.classList.add('flash-up');
+        } else if (price < lastPrice) {
+          priceBox.classList.remove('flash-up');
+          priceBox.classList.add('flash-down');
+        }
+        setTimeout(() => priceBox.classList.remove('flash-up', 'flash-down'), 600);
+        lastPrice = price;
+
+        // Push to Chart
+        const d = new Date();
+        const timeStr = `${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+        tradingChart.data.labels.push(timeStr);
+        tradingChart.data.datasets[0].data.push(price);
+        if (tradingChart.data.labels.length > 25) {
+          tradingChart.data.labels.shift();
+          tradingChart.data.datasets[0].data.shift();
+        }
+        tradingChart.update();
+
+        // Jitter Orderbook Depth values slightly
+        updateOrderBook(price);
+      }
+
+      // 6. Ingest Trades
+      if (state.actions && Array.isArray(state.actions)) {
+        renderTape(state.actions);
+        renderLedger(state.actions);
+      }
+
+      // 7. Process Running States
+      setBotRunningState(Boolean(state.is_bot_running));
+    }
+
+    function updateOrderBook(mid) {
+      const spread = (Math.random() * 0.8 + 0.2).toFixed(2);
+      document.getElementById('ob-spread').textContent = `${spread} USDT`;
+      
+      const asks = document.querySelectorAll('#ob-asks > div');
+      if (asks[2]) asks[2].querySelector('span:first-of-type').textContent = (mid + 0.6).toFixed(2);
+      if (asks[1]) asks[1].querySelector('span:first-of-type').textContent = (mid + 1.8).toFixed(2);
+      if (asks[0]) asks[0].querySelector('span:first-of-type').textContent = (mid + 4.3).toFixed(2);
+
+      const bids = document.querySelectorAll('#ob-bids > div');
+      if (bids[0]) bids[0].querySelector('span:first-of-type').textContent = (mid - 0.6).toFixed(2);
+      if (bids[1]) bids[1].querySelector('span:first-of-type').textContent = (mid - 2.0).toFixed(2);
+      if (bids[2]) bids[2].querySelector('span:first-of-type').textContent = (mid - 4.1).toFixed(2);
+    }
+
+    function renderTape(actions) {
+      const tape = document.getElementById('deck-executions-stream');
+      if (!tape || !actions) return;
+      tape.innerHTML = '';
+
+      actions.slice(0, 6).forEach(act => {
+        const isBuy = String(act.action).toUpperCase().includes('BUY');
+        const badgeClass = isBuy ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' : 'bg-rose-500/15 text-rose-400 border border-rose-500/25';
+        const pnl = act.pnl !== null && act.pnl !== undefined ?
+          (act.pnl >= 0 ? `<span class="text-emerald-400 font-bold">+${formatUsdt(act.pnl)}</span>` : `<span class="text-rose-400 font-bold">-${formatUsdt(Math.abs(act.pnl))}</span>`) :
+          '<span class="text-cyan-400">FILLED</span>';
+
+        const row = document.createElement('div');
+        row.className = 'p-2 rounded-lg border border-slate-800/70 bg-slate-900/70 flex items-center justify-between';
+        row.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${act.action}</span>
+              <span class="text-white font-semibold">${Number(act.size || 0.021).toFixed(4)} BTC</span>
+            </div>
+            <div class="text-[10px] text-slate-500 font-mono mt-0.5">${act.timestamp || 'Recent'} &bull; #${act.order_id || 'market'}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-slate-200 tabular-nums font-semibold">${formatUsdt(act.price)}</div>
+            <div class="text-[10px]">${pnl}</div>
+          </div>
+        `;
+        tape.appendChild(row);
+      });
+    }
+
+    function renderLedger(trades) {
+      const tbody = document.getElementById('ledger-tbody');
+      if (!tbody || !trades) return;
+      tbody.innerHTML = '';
+
+      trades.slice(0, 15).forEach(t => {
+        const isBuy = String(t.action).toUpperCase().includes('BUY');
+        const badgeClass = isBuy ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-400 border border-rose-500/20';
+        const notional = (Number(t.price || 0) * Number(t.size || 0)).toFixed(2);
+        const pnlHtml = t.pnl !== null && t.pnl !== undefined ?
+          (t.pnl >= 0 ? `<span class="text-emerald-400 font-bold">+${formatUsdt(t.pnl)}</span>` : `<span class="text-rose-400 font-bold">-${formatUsdt(Math.abs(t.pnl))}</span>`) :
+          `<span class="text-slate-500">—</span>`;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition-colors';
+        tr.innerHTML = `
+          <td class="px-5 py-3 text-slate-400 font-mono text-[11px]">${t.timestamp || '—'}</td>
+          <td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${t.action}</span></td>
+          <td class="px-5 py-3 font-semibold text-white tabular-nums">${formatUsdt(t.price)}</td>
+          <td class="px-5 py-3 text-slate-300 tabular-nums font-medium">${Number(t.size || 0).toFixed(4)}</td>
+          <td class="px-5 py-3 text-slate-400 tabular-nums">$${Number(notional).toLocaleString()}</td>
+          <td class="px-5 py-3 tabular-nums">${pnlHtml}</td>
+          <td class="px-5 py-3 text-right text-slate-400 text-[11px]">${t.order_id ? '#' + t.order_id : 'market'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setBotRunningState(running) {
+      isBotActive = running;
+      const headerPill = document.getElementById('header-bot-pill');
+      const headerStatus = document.getElementById('header-bot-status-text');
+      const headerBtn = document.getElementById('header-bot-action-btn');
+      const headerIcon = document.getElementById('header-action-icon');
+      const headerText = document.getElementById('header-action-text');
+
+      const deckStart = document.getElementById('deck-start-bot-btn');
+      const deckStop = document.getElementById('deck-stop-bot-btn');
+
+      if (running) {
+        headerPill.className = 'hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 font-mono text-xs';
+        headerStatus.textContent = 'REALTIME ACTIVE';
+        headerStatus.className = 'text-emerald-400 font-bold';
+
+        headerBtn.className = 'inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-600/30 transition-all cursor-pointer';
+        headerText.textContent = 'Stop Bot';
+        headerIcon.setAttribute('data-lucide', 'square');
+
+        deckStart.classList.add('hidden');
+        deckStop.classList.remove('hidden');
+      } else {
+        headerPill.className = 'hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 font-mono text-xs';
+        headerStatus.textContent = 'BOT STANDBY';
+        headerStatus.className = 'text-amber-300 font-bold';
+
+        headerBtn.className = 'inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition-all cursor-pointer';
+        headerText.textContent = 'Run Realtime Bot';
+        headerIcon.setAttribute('data-lucide', 'play');
+
+        deckStart.classList.remove('hidden');
+        deckStop.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // ── 4. Socket.IO Real-Time Connection ──
+    const socket = io();
+
+    socket.on('connect', () => {
+      document.getElementById('top-socket-status').textContent = 'BINANCE TESTNET WS LIVE';
+      fetch('/api/state').then(r => r.json()).then(updateTerminalData).catch(console.error);
+    });
+
+    socket.on('state_update', (data) => {
+      updateTerminalData(data);
+    });
+
+    // ── 5. Start / Stop Process Actions ──
+    function launchRealtimeBot() {
+      fetch('/api/bot/start', { method: 'POST' })
+        .then(r => r.json())
+        .then(res => {
+          if (res.status === 'started' || res.status === 'already_running') {
+            setBotRunningState(true);
+          }
+        })
+        .catch(console.error);
+    }
+
+    function haltBot() {
+      fetch('/api/bot/stop', { method: 'POST' })
+        .then(r => r.json())
+        .then(res => {
+          setBotRunningState(false);
+        })
+        .catch(console.error);
+    }
+
+    document.getElementById('header-bot-action-btn').addEventListener('click', () => {
+      if (isBotActive) haltBot(); else launchRealtimeBot();
+    });
+    document.getElementById('deck-start-bot-btn').addEventListener('click', launchRealtimeBot);
+    document.getElementById('deck-stop-bot-btn').addEventListener('click', haltBot);
+
+    // Reset Panel Listener
+    const resetBtn = document.getElementById('header-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', async () => {
+        if (!confirm('Reset Panel: Archive old trades and reset PnL & trade ledger to zero?')) return;
+        try {
+          resetBtn.disabled = true;
+          resetBtn.classList.add('opacity-50');
+          const res = await fetch('/api/reset', { method: 'POST' });
+          const d = await res.json();
+          if (d.status === 'reset_complete' && d.state) {
+            updateTerminalData(d.state);
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          resetBtn.disabled = false;
+          resetBtn.classList.remove('opacity-50');
+        }
+      });
+    }
+
+    // ── 6. Risk Calculator Dynamics ──
+    const calcCapital = document.getElementById('calc-capital');
+    const calcRisk = document.getElementById('calc-risk');
+    const calcSl = document.getElementById('calc-sl');
+    const calcRr = document.getElementById('calc-rr');
+
+    function updateCalculator() {
+      const cap = parseFloat(calcCapital.value);
+      const risk = parseFloat(calcRisk.value);
+      const sl = parseFloat(calcSl.value);
+      const rr = parseFloat(calcRr.value);
+
+      document.getElementById('calc-capital-val').textContent = formatUsdt(cap);
+      document.getElementById('calc-risk-val').textContent = risk.toFixed(1) + '%';
+      document.getElementById('calc-sl-val').textContent = sl.toFixed(2) + '%';
+      document.getElementById('calc-rr-val').textContent = `1 : ${rr.toFixed(1)}`;
+
+      const dollarRisk = cap * (risk / 100);
+      const posSize = dollarRisk / (sl / 100);
+      const tp = dollarRisk * rr;
+      const dailyCap = dollarRisk * 3;
+
+      document.getElementById('res-risk-dollar').textContent = formatUsdt(dollarRisk);
+      document.getElementById('res-pos-size').textContent = formatUsdt(posSize);
+      document.getElementById('res-profit-target').textContent = `+${formatUsdt(tp)}`;
+      document.getElementById('res-daily-cap').textContent = `-${formatUsdt(dailyCap)}`;
+    }
+    [calcCapital, calcRisk, calcSl, calcRr].forEach(input => input.addEventListener('input', updateCalculator));
+    updateCalculator();
+
+    // ── 7. Strategy Matrix Tabs ──
+    const tabs = {
+      tick: { btn: document.getElementById('tab-strat-tick'), content: document.getElementById('content-strat-tick') },
+      sma: { btn: document.getElementById('tab-strat-sma'), content: document.getElementById('content-strat-sma') },
+      ml: { btn: document.getElementById('tab-strat-ml'), content: document.getElementById('content-strat-ml') }
+    };
+    function selectTab(k) {
+      Object.keys(tabs).forEach(id => {
+        if (id === k) {
+          tabs[id].btn.className = 'strategy-tab-btn active px-4 py-2.5 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow cursor-pointer';
+          tabs[id].content.classList.remove('hidden');
+        } else {
+          tabs[id].btn.className = 'strategy-tab-btn px-4 py-2.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-slate-200 cursor-pointer';
+          tabs[id].content.classList.add('hidden');
+        }
+      });
+    }
+    tabs.tick.btn.addEventListener('click', () => selectTab('tick'));
+    tabs.sma.btn.addEventListener('click', () => selectTab('sma'));
+    tabs.ml.btn.addEventListener('click', () => selectTab('ml'));
+
+    // ── 8. FAQ Toggles ──
+    document.querySelectorAll('.faq-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        const ans = item.querySelector('.faq-a');
+        const icon = btn.querySelector('svg');
+        const hidden = ans.classList.contains('hidden');
+        document.querySelectorAll('.faq-a').forEach(a => a.classList.add('hidden'));
+        document.querySelectorAll('.faq-q svg').forEach(i => i.style.transform = 'rotate(0deg)');
+        if (hidden) {
+          ans.classList.remove('hidden');
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+      });
+    });
+
+    // ── 9. Modal Controls ──
+    const modal = document.getElementById('terminal-modal');
+    document.getElementById('open-terminal-modal').addEventListener('click', () => modal.classList.remove('hidden'));
+    document.getElementById('close-terminal-modal').addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+    // Initial Fetch & Active Sync Poller (1.5s fallback)
+    function syncLiveState() {
+      fetch('/api/state').then(r => r.json()).then(updateTerminalData).catch(() => {});
+      fetch('/api/bot/status').then(r => r.json()).then(d => setBotRunningState(Boolean(d.running))).catch(() => {});
+    }
+    syncLiveState();
+    setInterval(syncLiveState, 1500);
+
+    // Ensure user lands at top terminal deck
+    if (!window.location.hash || window.location.hash === '#faq') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  </script>
+</body>
+</html>

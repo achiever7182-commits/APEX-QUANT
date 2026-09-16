@@ -38,8 +38,11 @@ class Strategy(ABC):
         self.history: list[MarketData] = []
 
     def update(self, candle: MarketData) -> Signal:
-        """Called by the engine on every new candle. Stores history, then decides."""
-        self.history.append(candle)
+        """Called by the engine on every tick/candle. Updates current in-progress candle or appends new candle."""
+        if self.history and self.history[-1].timestamp == candle.timestamp:
+            self.history[-1] = candle
+        else:
+            self.history.append(candle)
         return self.decide()
 
     @abstractmethod

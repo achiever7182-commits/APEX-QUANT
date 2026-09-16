@@ -11,11 +11,14 @@ market is quiet or no trade is triggered.
 
 from __future__ import annotations
 
+import os
 import sys
 import threading
 import time
 from dataclasses import dataclass
 from typing import Any
+
+import config
 
 from rich.console import Console
 from rich.style import Style
@@ -23,21 +26,52 @@ from rich.style import Style
 from adapters.binance_adapter import BinanceTestnetAdapter
 from adapters.binance_websocket_adapter import BinanceWebSocketAdapter
 from core.risk_manager import RiskConfig, RiskManager
-from core.strategy import Signal
+from core.strategy import Signal, MarketData
 from core.tick_strategy import TickMomentumStrategy
-from core.strategies import list_strategies
+from core.strategies import get_strategy, list_strategies
 from core.execution import execute_order, fee_tracker
 from state.store import StateStore
 from config import (
     API_KEY, API_SECRET, SYMBOL, WS_SYMBOL,
     PRINT_INTERVAL_SECONDS, RECONNECT_CHECK_SECONDS,
-    THRESHOLD_PCT, WINDOW_SIZE, MIN_SECONDS_BETWEEN_TRADES,
-    DRY_RUN, validate_keys,
+    THRESHOLD_PCT, WINDOW_SIZE, TAKE_PROFIT_PCT, STOP_LOSS_PCT, TRAILING_STOP_PCT,
+    MIN_SECONDS_BETWEEN_TRADES, DRY_RUN, validate_keys,
 )
 from utils import order_fill_price
 
+# Dashboard web emit — active when dashboard server is running
+try:
+    from dashboard.server import emit_state as _emit_state
+except Exception:
+    _emit_state = None
 
-_strategy_name: str = "tick"
+
+def _send_telemetry(payload: dict) -> None:
+    """Send state payload to local web dashboard server if running."""
+    def _worker():
+        if _emit_state is not None:
+            try:
+                _emit_state(payload)
+            except Exception:
+                pass
+        try:
+            import json
+            import urllib.request
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                "http://127.0.0.1:5000/api/telemetry",
+                data=data,
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=1.5):
+                pass
+        except Exception:
+            pass
+
+    threading.Thread(target=_worker, daemon=True).start()
+
+
+_strategy_name: str = "ml" if os.path.exists(getattr(config, "ML_MODEL_PATH", "models/ml_model.joblib")) else "tick"
 
 
 def set_strategy(name: str) -> None:
@@ -47,13 +81,7 @@ def set_strategy(name: str) -> None:
     if name in ("tick", "momentum", "tick_momentum"):
         _strategy_name = "tick"
     elif name in list_strategies():
-        print(
-            f"[realtime] Error: '{name}' is a candle-based strategy.\n"
-            f"This mode only supports tick-based strategies (e.g. 'tick').\n"
-            f"Use polling mode for {name.upper()}:\n"
-            f"    python run.py polling --strategy {name}"
-        )
-        sys.exit(1)
+        _strategy_name = name
     else:
         print(f"[realtime] Error: Unknown strategy '{name}'. Available: {list_strategies()} or 'tick'")
         sys.exit(1)
@@ -94,6 +122,7 @@ class TradingSession:
         self.win_count = 0
         self.loss_count = 0
         self.last_trade_pnl: float | None = None
+        self.starting_balance = 82359.55
         self.started_at = time.monotonic()
 
     @staticmethod
@@ -171,27 +200,82 @@ def format_position(position: Position | None) -> str:
 
 def print_snapshot(session: TradingSession, console: Console) -> None:
     snapshot = session.snapshot()
+    price = snapshot["price"]
+    sig = snapshot["signal"]
+    pos = snapshot["position"]
+    r_pnl = snapshot["realized_pnl"]
+    u_pnl = snapshot["unrealized_pnl"]
+    trades = snapshot["trade_count"]
+    win_rate = snapshot["win_rate"]
+
+    # High-clarity institutional terminal layout
+    pnl_val = r_pnl + u_pnl
+    pnl_tag = f"[{'bold green' if pnl_val > 0 else 'bold red' if pnl_val < 0 else 'yellow'}]{r_pnl:+.2f}[/]"
+    unr_tag = f"[{'green' if u_pnl > 0 else 'red' if u_pnl < 0 else 'dim'}]{u_pnl:+.2f}[/]"
+    sig_tag = f"[{'bold green' if sig == 'BUY' else 'bold red' if sig == 'SELL' else 'dim yellow'}]{sig:<4}[/]"
+    pos_tag = f"[{'bold cyan' if pos else 'dim white'}]{format_position(pos)}[/]"
+
     line = (
-        f"[{session.now()}] price={snapshot['price']:.2f} | "
-        f"signal={snapshot['signal']:<5} | "
-        f"position={format_position(snapshot['position'])} | "
-        f"realized_PnL={snapshot['realized_pnl']:+.2f} | "
-        f"unrealized_PnL={snapshot['unrealized_pnl']:+.2f} | "
-        f"trades={snapshot['trade_count']} | "
-        f"win_rate={snapshot['win_rate']:.1f}%"
+        f"[dim]{session.now()}[/dim] │ "
+        f"[bold white]{SYMBOL}[/] [bold cyan]${price:,.2f}[/] │ "
+        f"SIG {sig_tag} │ "
+        f"POS {pos_tag} │ "
+        f"PNL {pnl_tag} (u: {unr_tag}) │ "
+        f"TRADES [bold white]{trades}[/] ([cyan]{win_rate:.1f}%[/] WR)"
     )
-    last_trade_pnl = snapshot["last_trade_pnl"]
-    if snapshot["unrealized_pnl"] < 0 or (last_trade_pnl is not None and last_trade_pnl < 0):
-        style = Style(color="red")
-    elif snapshot["unrealized_pnl"] > 0 or (last_trade_pnl is not None and last_trade_pnl > 0):
-        style = Style(color="green")
-    else:
-        style = Style(color="yellow")
-    console.print(line, style=style, markup=False, no_wrap=True, overflow="ignore")
+    console.print(line, markup=True, no_wrap=True, overflow="ignore")
+
+    # Send full telemetry to local web dashboard server
+    balance = getattr(session, "starting_balance", 82359.55) + r_pnl + u_pnl
+    payload = {
+        "symbol": SYMBOL,
+        "price": price,
+        "signal": sig,
+        "realized_pnl": r_pnl,
+        "unrealized_pnl": u_pnl,
+        "daily_pnl": r_pnl,
+        "trade_count": trades,
+        "win_count": session.win_count,
+        "loss_count": session.loss_count,
+        "win_rate": win_rate,
+        "total_fees_paid": getattr(fee_tracker, "total_fees", 0.0),
+        "position_open": pos is not None,
+        "position_size": pos.size if pos else 0.0,
+        "entry_price": pos.entry_price if pos else 0.0,
+        "balance": balance,
+        "starting_balance": getattr(session, "starting_balance", 82359.55),
+        "is_bot_running": True,
+        "last_trade_pnl": snapshot["last_trade_pnl"],
+        "timestamp": session.now(),
+    }
+    _send_telemetry(payload)
 
 
 def printer_loop(session: TradingSession, console: Console) -> None:
+    last_mtime = 0.0
+    state_file = getattr(config, "STATE_FILE", "bot_state.json")
     while not session.stop_event.wait(PRINT_INTERVAL_SECONDS):
+        try:
+            if os.path.exists(state_file):
+                mtime = os.path.getmtime(state_file)
+                if mtime > last_mtime:
+                    last_mtime = mtime
+                    import json
+                    with open(state_file, "r", encoding="utf-8") as sf:
+                        st = json.load(sf)
+                    if st.get("trade_count", 0) == 0 and st.get("realized_pnl", 0.0) == 0.0:
+                        with session.lock:
+                            if session.trade_count > 0 or session.realized_pnl != 0.0:
+                                session.realized_pnl = 0.0
+                                session.unrealized_pnl = 0.0
+                                session.trade_count = 0
+                                session.win_count = 0
+                                session.loss_count = 0
+                                session.last_trade_pnl = None
+                                session.trade_history.clear()
+                                console.print("[bold cyan]● STATE RESET DETECTED: Cleared session trade counters to 0.[/bold cyan]")
+        except Exception:
+            pass
         print_snapshot(session, console)
 
 
@@ -201,7 +285,24 @@ def run() -> None:
 
     order_adapter = BinanceTestnetAdapter(API_KEY, API_SECRET, symbol=SYMBOL)
     websocket_adapter = BinanceWebSocketAdapter(symbol=WS_SYMBOL)
-    strategy = TickMomentumStrategy(threshold_pct=THRESHOLD_PCT, window_size=WINDOW_SIZE)
+    is_candle_strategy = (_strategy_name != "tick")
+    if is_candle_strategy:
+        strategy = get_strategy(_strategy_name)
+    else:
+        strategy = TickMomentumStrategy(
+            threshold_pct=THRESHOLD_PCT,
+            window_size=WINDOW_SIZE,
+            take_profit_pct=TAKE_PROFIT_PCT,
+            stop_loss_pct=STOP_LOSS_PCT,
+            trailing_stop_pct=TRAILING_STOP_PCT,
+        )
+
+    def set_pos_open(val: bool) -> None:
+        if hasattr(strategy, "position_open"):
+            strategy.position_open = val
+        if hasattr(strategy, "_position_open"):
+            strategy._position_open = val
+
     starting_balance = order_adapter.fetch_balance("USDT")
     min_notional = order_adapter.get_min_notional()
     risk = RiskManager(
@@ -212,9 +313,29 @@ def run() -> None:
         ),
     )
     session = TradingSession()
+    session.starting_balance = starting_balance if (starting_balance and starting_balance > 0) else 82359.55
     console = Console()
     connection_lock = threading.Lock()
     last_connection_attempt = 0.0
+
+    current_candle = None
+    current_candle_start_ms = 0
+    tf_str = getattr(config, "ML_TIMEFRAME", "1h")
+
+    if is_candle_strategy:
+        console.print(f"[bold cyan]● INITIALIZED STRATEGY:[/] {_strategy_name.upper()} (Trained Quant/ML Engine, {tf_str})")
+        try:
+            init_candles = order_adapter.fetch_candles(timeframe=tf_str, limit=50)
+            if init_candles:
+                for c in init_candles[:-1]:
+                    strategy.update(c)
+                current_candle = init_candles[-1]
+                current_candle_start_ms = current_candle.timestamp
+                console.print(f"[bold green]● Loaded {len(init_candles)} historical candles. Strategy Inference Active.[/bold green]")
+        except Exception as e:
+            console.print(f"[yellow]Warning fetching initial candles: {e}[/yellow]")
+    else:
+        console.print(f"[bold cyan]● INITIALIZED STRATEGY:[/] TICK MOMENTUM (TP={TAKE_PROFIT_PCT}%, SL={STOP_LOSS_PCT}%)")
 
     # Load persistent state and reconcile against Binance balance
     store = StateStore()
@@ -230,9 +351,9 @@ def run() -> None:
             open_pos.get("entry_time", session.now(False)),
             entry_fee=float(open_pos.get("entry_fee", open_pos["size"] * open_pos["entry_price"] * 0.001)),
         )
-        strategy.position_open = True
+        set_pos_open(True)
         risk.open_positions = 1
-        print(f"[state] Position active: {open_pos['size']:.6f} BTC @ {open_pos['entry_price']:.2f} USDT")
+        console.print(f"[bold cyan]● RECOVERED POSITION:[/] {open_pos['size']:.6f} BTC @ ${open_pos['entry_price']:.2f}")
     if persisted.get("realized_pnl"):
         session.realized_pnl = float(persisted["realized_pnl"])
         risk.daily_pnl = float(persisted.get("daily_pnl", 0.0))
@@ -241,87 +362,164 @@ def run() -> None:
         session.loss_count = int(persisted.get("loss_count", 0))
 
     def handle_tick(tick: dict[str, Any]) -> None:
-        price = float(tick["price"])
-        strategy_signal = strategy.on_tick(price)
-        display_signal = "SELL" if strategy_signal == Signal.CLOSE else strategy_signal.value
-        session.update_tick(price, display_signal)
-
-        if strategy_signal == Signal.BUY and risk.can_open_position():
-            capital = risk.position_size()
-            if not risk.check_min_notional(capital):
+        try:
+            price = float(tick.get("price", 0.0))
+            if price <= 0.0:
                 return
-            requested_size = capital / price
-            if DRY_RUN:
-                sim_fee = requested_size * price * 0.001
-                session.open_position(price, requested_size, session.now(False), entry_fee=sim_fee)
-                risk.open_positions += 1
-                risk.mark_trade_executed()
-                print(f"[{session.now(False)}] DRY-RUN BUY executed at {price:.2f} | size={requested_size:.6f} | fee={sim_fee:.4f}")
+            now_ms = int(tick.get("timestamp") or (time.time() * 1000))
+
+            if is_candle_strategy:
+                nonlocal current_candle, current_candle_start_ms
+                tf_seconds = 3600 if tf_str == "1h" else (300 if tf_str == "5m" else 60)
+                tf_ms = tf_seconds * 1000
+
+                if current_candle is None or (now_ms - current_candle_start_ms) >= tf_ms:
+                    if current_candle is not None:
+                        strategy.update(current_candle)
+                    current_candle_start_ms = now_ms
+                    current_candle = MarketData(
+                        open=price,
+                        high=price,
+                        low=price,
+                        close=price,
+                        volume=float(tick.get("quantity", 0.0)),
+                        timestamp=now_ms,
+                    )
+                else:
+                    current_candle.close = price
+                    current_candle.high = max(current_candle.high, price)
+                    current_candle.low = min(current_candle.low, price)
+                    current_candle.volume += float(tick.get("quantity", 0.0))
+
+                strategy_signal = strategy.decide()
+
+                # Manage SL / TP on open position
+                sl_pct = getattr(strategy, "stop_loss", 0.015)
+                tp_pct = getattr(strategy, "take_profit", 0.035)
+                with session.lock:
+                    pos = session.position
+                if pos is not None and pos.entry_price > 0:
+                    pnl_pct = (price - pos.entry_price) / pos.entry_price
+                    if pnl_pct <= -sl_pct or pnl_pct >= tp_pct:
+                        strategy_signal = Signal.CLOSE
             else:
-                try:
-                    fill = execute_order(order_adapter, "buy", requested_size, price)
-                    session.open_position(fill.fill_price, fill.filled_qty, session.now(False), entry_fee=fill.fee_paid)
+                strategy_signal = strategy.on_tick(price)
+
+            display_signal = "SELL" if strategy_signal in (Signal.CLOSE, Signal.SELL) else strategy_signal.value
+            session.update_tick(price, display_signal)
+
+            if strategy_signal == Signal.BUY and risk.can_open_position():
+                capital = risk.position_size()
+                if not risk.check_min_notional(capital):
+                    return
+                requested_size = capital / price
+                if DRY_RUN:
+                    sim_fee = requested_size * price * 0.001
+                    session.open_position(price, requested_size, session.now(False), entry_fee=sim_fee)
                     risk.open_positions += 1
                     risk.mark_trade_executed()
-                    persisted["open_position"] = {
-                        "entry_price": fill.fill_price,
-                        "size": fill.filled_qty,
-                        "entry_time": session.now(False),
-                        "entry_fee": fill.fee_paid,
-                        "side": "long",
-                    }
-                    store.save(persisted)
-                    print(
-                        f"[{session.now(False)}] BUY executed at {fill.fill_price:.2f} ({fill.method}) "
-                        f"| fee={fill.fee_paid:.4f} | order={fill.order_id}"
-                    )
-                except Exception as error:
-                    # The strategy flips its internal flag before returning BUY. Put
-                    # it back so an order failure does not create a phantom position.
-                    strategy.position_open = False
-                    print(f"[{session.now(False)}] BUY order failed: {error}")
+                    console.print(f"[dim]{session.now(False)}[/dim] [bold green]▲ DRY-RUN BUY[/] @ ${price:.2f} | size={requested_size:.6f}")
+                else:
+                    try:
+                        fill = execute_order(order_adapter, "buy", requested_size, price)
+                        session.open_position(fill.fill_price, fill.filled_qty, session.now(False), entry_fee=fill.fee_paid)
+                        risk.open_positions += 1
+                        risk.mark_trade_executed()
+                        persisted["open_position"] = {
+                            "entry_price": fill.fill_price,
+                            "size": fill.filled_qty,
+                            "entry_time": session.now(False),
+                            "entry_fee": fill.fee_paid,
+                            "side": "long",
+                        }
+                        try:
+                            store.save(persisted)
+                        except Exception as se:
+                            console.print(f"[yellow]Warning saving state: {se}[/yellow]")
+                        console.print(
+                            f"[dim]{session.now(False)}[/dim] [bold green]▲ BUY FILLED[/] @ ${fill.fill_price:,.2f} "
+                            f"| size={fill.filled_qty:.4f} BTC | fee=${fill.fee_paid:.4f} | #{fill.order_id}"
+                        )
+                        trade_act = {
+                            "timestamp": session.now(False),
+                            "action": "BUY",
+                            "price": fill.fill_price,
+                            "size": fill.filled_qty,
+                            "pnl": None,
+                            "order_id": str(fill.order_id),
+                        }
+                        _send_telemetry({
+                            "last_action": trade_act,
+                            "actions": [trade_act],
+                            "position_open": True,
+                            "position_size": fill.filled_qty,
+                            "entry_price": fill.fill_price,
+                            "price": fill.fill_price,
+                            "signal": "BUY",
+                        })
+                    except Exception as error:
+                        set_pos_open(False)
+                        console.print(f"[bold red]BUY order failed:[/] {error}")
 
-        elif strategy_signal == Signal.CLOSE and risk.can_close_position():
-            with session.lock:
-                position = session.position
-            if position is None:
-                strategy.position_open = False
-                return
-            if DRY_RUN:
-                sim_exit_fee = position.size * price * 0.001
-                trade_pnl = session.close_position(price, session.now(False), exit_fee=sim_exit_fee)
-                risk.record_trade_result(trade_pnl)
-                risk.open_positions -= 1
-                risk.mark_trade_executed()
-                print(
-                    f"[{session.now(False)}] DRY-RUN SELL executed at {price:.2f} "
-                    f"| Net P&L={trade_pnl:+.2f} USDT (fees: {position.entry_fee + sim_exit_fee:.4f})"
-                )
-            else:
-                try:
-                    fill = execute_order(order_adapter, "sell", position.size, price)
-                    trade_pnl = session.close_position(fill.fill_price, session.now(False), exit_fee=fill.fee_paid)
+            elif strategy_signal == Signal.CLOSE and risk.can_close_position():
+                with session.lock:
+                    position = session.position
+                if position is None:
+                    set_pos_open(False)
+                    return
+                if DRY_RUN:
+                    sim_exit_fee = position.size * price * 0.001
+                    trade_pnl = session.close_position(price, session.now(False), exit_fee=sim_exit_fee)
                     risk.record_trade_result(trade_pnl)
                     risk.open_positions -= 1
                     risk.mark_trade_executed()
-                    store.record_trade(
-                        persisted,
-                        entry_price=position.entry_price,
-                        exit_price=fill.fill_price,
-                        size=position.size,
-                        pnl=trade_pnl,
-                        fee=fill.fee_paid,
-                        entry_time=position.entry_time,
-                        exit_time=session.now(False),
-                    )
-                    print(
-                        f"[{session.now(False)}] SELL executed at {fill.fill_price:.2f} ({fill.method}) "
-                        f"| Net P&L={trade_pnl:+.2f} USDT (total fees: {position.entry_fee + fill.fee_paid:.4f}) | order={fill.order_id}"
-                    )
-                except Exception as error:
-                    # Keep both local and strategy state open until a sell is confirmed.
-                    strategy.position_open = True
-                    print(f"[{session.now(False)}] SELL order failed: {error}")
+                    console.print(f"[dim]{session.now(False)}[/dim] [bold red]▼ DRY-RUN SELL[/] @ ${price:.2f} | PnL={trade_pnl:+.2f}")
+                else:
+                    try:
+                        fill = execute_order(order_adapter, "sell", position.size, price)
+                        trade_pnl = session.close_position(fill.fill_price, session.now(False), exit_fee=fill.fee_paid)
+                        risk.record_trade_result(trade_pnl)
+                        risk.open_positions -= 1
+                        risk.mark_trade_executed()
+                        try:
+                            store.record_trade(
+                                persisted,
+                                entry_price=position.entry_price,
+                                exit_price=fill.fill_price,
+                                size=position.size,
+                                pnl=trade_pnl,
+                                fee=fill.fee_paid,
+                                entry_time=position.entry_time,
+                                exit_time=session.now(False),
+                            )
+                        except Exception as te:
+                            console.print(f"[yellow]Warning recording trade to state: {te}[/yellow]")
+                        console.print(
+                            f"[dim]{session.now(False)}[/dim] [bold {'green' if trade_pnl >= 0 else 'red'}]▼ SELL FILLED[/] @ ${fill.fill_price:,.2f} "
+                            f"| Net PnL={trade_pnl:+.2f} USDT | #{fill.order_id}"
+                        )
+                        trade_act = {
+                            "timestamp": session.now(False),
+                            "action": "SELL",
+                            "price": fill.fill_price,
+                            "size": position.size,
+                            "pnl": trade_pnl,
+                            "order_id": str(fill.order_id),
+                        }
+                        _send_telemetry({
+                            "last_action": trade_act,
+                            "actions": [trade_act],
+                            "position_open": False,
+                            "position_size": 0.0,
+                            "realized_pnl": session.realized_pnl,
+                            "price": fill.fill_price,
+                            "signal": "SELL",
+                        })
+                    except Exception as error:
+                        set_pos_open(True)
+                        console.print(f"[bold red]SELL order failed:[/] {error}")
+        except Exception as tick_err:
+            console.print(f"[bold red]Tick processing exception:[/] {tick_err}")
 
     def connect_websocket() -> None:
         nonlocal last_connection_attempt

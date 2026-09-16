@@ -41,3 +41,12 @@ Thumbs.db
 bot_state.json
 trade_log.csv
 state/
+
+# Local databases & caches
+*.db
+*.sqlite
+*.sqlite3
+
+# Archive backups
+bot_state_archive_*.json
+trade_log_archive_*.csv

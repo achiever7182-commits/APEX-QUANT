@@ -14,7 +14,7 @@ constexpr char kWsUrl[]    = "wss://stream.testnet.binance.vision/ws/btcusdt@tra
 constexpr char kRestBase[] = "https://testnet.binance.vision";
 
 // Strategy parameters
-constexpr double kThresholdPct = 0.08;  // tick momentum threshold (%)
+constexpr double kThresholdPct = 0.25;  // tick momentum threshold (%) — comfortably exceeds exchange fees
 
 // Risk / execution parameters
 constexpr double kCooldownSeconds  = 15.0;

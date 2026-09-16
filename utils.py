@@ -70,10 +70,21 @@ def order_fill_price(order: dict[str, Any], fallback: float) -> float:
 # Trade logging
 # ---------------------------------------------------------------------------
 
-def log_trade(action: str, ts: str, price: float, size: float) -> None:
+def log_trade(
+    action: str,
+    ts: str,
+    price: float,
+    size: float,
+    pnl: float | None = None,
+    confidence: float | None = None,
+    reason: str = "",
+) -> None:
     """Append a trade action to the CSV log file."""
     file_exists = os.path.isfile(LOG_FILE)
-    with open(LOG_FILE, "a") as f:
-        if not file_exists:
-            f.write("timestamp,action,price,size\n")
-        f.write(f"{ts},{action},{price:.2f},{size:.6f}\n")
+    pnl_str = f"{pnl:+.4f}" if pnl is not None else ""
+    conf_str = f"{confidence * 100:.1f}%" if confidence is not None and confidence > 0 else ""
+    clean_reason = reason.replace('"', "'").replace("\n", " ")
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        if not file_exists or os.path.getsize(LOG_FILE) == 0:
+            f.write("timestamp,action,price,size,pnl,confidence,reason\n")
+        f.write(f"{ts},{action},{price:.2f},{size:.6f},{pnl_str},{conf_str},\"{clean_reason}\"\n")

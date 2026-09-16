@@ -34,11 +34,17 @@ class RiskManager:
     def can_open_position(self) -> bool:
         if self.trading_halted:
             return False
+        if self.balance <= 0 or self.starting_balance <= 0:
+            return False
         if self.open_positions >= self.config.max_open_positions:
             return False
         if time.time() - self.last_trade_time < self.config.min_seconds_between_trades:
             return False  # still cooling down since the last trade
-        daily_loss_pct = -self.daily_pnl / self.starting_balance if self.daily_pnl < 0 else 0
+        daily_loss_pct = (
+            -self.daily_pnl / self.starting_balance
+            if (self.daily_pnl < 0 and self.starting_balance > 0)
+            else 0.0
+        )
         if daily_loss_pct >= self.config.max_daily_loss_pct:
             self.trading_halted = True
             return False

@@ -22,7 +22,7 @@ _REGISTRY: dict[str, tuple] = {
     "rsi":       (RSIStrategy,           {"period": 14, "oversold": 30.0, "overbought": 70.0}),
     "macd":      (MACDStrategy,          {"fast_period": 12, "slow_period": 26, "signal_period": 9}),
     "bollinger": (BollingerStrategy,     {"period": 20, "multiplier": 2.0}),
-    "ml":        (MLStrategy,            {"buy_threshold": 0.53, "close_threshold": 0.48}),
+    "ml":        (MLStrategy,            {"min_confidence": 0.60}),
 }
 
 

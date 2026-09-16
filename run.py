@@ -81,6 +81,8 @@ def parse_args() -> argparse.Namespace:
                         help=f"Trading pair (default: {SYMBOL})")
     parser.add_argument("--port", type=int, default=None,
                         help="Web dashboard port (default: 5000)")
+    parser.add_argument("--dashboard", "-d", action="store_true",
+                        help="Start web dashboard server on localhost:5000")
     parser.add_argument("--no-trade", action="store_true",
                         help="Dry-run: log signals but place no real orders")
     parser.add_argument("--no-browser", action="store_true",
@@ -139,8 +141,8 @@ def main() -> None:
     import importlib
     module = importlib.import_module(MODES[mode])
 
-    if mode == "dashboard":
-        # Start web dashboard server, then run the terminal bot
+    if mode == "dashboard" or getattr(args, "dashboard", False):
+        # Start web dashboard server, then run the bot
         from dashboard.server import DashboardServer
         server = DashboardServer()
         server.start(open_browser=not args.no_browser)
@@ -149,7 +151,10 @@ def main() -> None:
     if args.strategy and hasattr(module, "set_strategy"):
         module.set_strategy(args.strategy)
 
-    module.run()
+    try:
+        module.run(mode=mode)
+    except TypeError:
+        module.run()
 
 
 if __name__ == "__main__":

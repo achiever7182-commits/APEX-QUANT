@@ -68,28 +68,49 @@ def set_strategy(name: str) -> None:
 
 def _push_web(state: dict, new_action: dict | None = None) -> None:
     """Push state snapshot to the web dashboard if it is running."""
-    if _emit_state is None:
-        return
-    try:
-        _emit_state({
-            "price":            state.get("price", 0.0),
-            "signal":           state.get("signal", "HOLD"),
-            "realized_pnl":     state.get("realized_pnl", 0.0),
-            "unrealized_pnl":   state.get("unrealized_pnl", 0.0),
-            "trade_count":      state.get("trade_count", 0),
-            "win_count":        state.get("wins", 0),
-            "loss_count":       state.get("loss_count", 0),
-            "total_fees_paid":  fee_tracker.total_fees,
-            "position_open":    bool(state.get("position_amount", 0.0)),
-            "position_size":    state.get("position_amount", 0.0),
-            "entry_price":      state.get("entry_price", 0.0),
-            "starting_balance": state.get("starting_balance", 10000.0),
-            "balance":          state.get("balance", 10000.0),
-            "last_action":      new_action,
-            "actions":          list(state.get("actions", [])),
-        })
-    except Exception:
-        pass
+    payload = {
+        "symbol":           SYMBOL,
+        "price":            state.get("price", 0.0),
+        "signal":           state.get("signal", "HOLD"),
+        "realized_pnl":     state.get("realized_pnl", 0.0),
+        "unrealized_pnl":   state.get("unrealized_pnl", 0.0),
+        "daily_pnl":        state.get("realized_pnl", 0.0),
+        "trade_count":      state.get("trade_count", 0),
+        "win_count":        state.get("wins", 0),
+        "loss_count":       state.get("loss_count", 0),
+        "win_rate":         round((state.get("wins", 0) / (state.get("wins", 0) + state.get("loss_count", 0)) * 100), 1) if (state.get("wins", 0) + state.get("loss_count", 0)) else 0.0,
+        "total_fees_paid":  getattr(fee_tracker, "total_fees", 0.0),
+        "position_open":    bool(state.get("position_amount", 0.0)),
+        "position_size":    state.get("position_amount", 0.0),
+        "entry_price":      state.get("entry_price", 0.0),
+        "starting_balance": state.get("starting_balance", 82359.55),
+        "balance":          state.get("balance", 82359.55),
+        "last_action":      new_action,
+        "actions":          list(state.get("actions", [])),
+        "is_bot_running":   True,
+    }
+
+    def _worker():
+        try:
+            import json
+            import urllib.request
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                "http://127.0.0.1:5000/api/telemetry",
+                data=data,
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=0.3):
+                pass
+        except Exception:
+            pass
+        if _emit_state is not None:
+            try:
+                _emit_state(payload)
+            except Exception:
+                pass
+
+    threading.Thread(target=_worker, daemon=True).start()
 
 
 def build_dashboard(state: dict[str, Any]) -> Panel:

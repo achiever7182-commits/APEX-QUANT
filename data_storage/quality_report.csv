@@ -1,0 +1,6 @@
+symbol,rows,start_date,end_date,missing_trading_days,duplicates,nan_rows,negative_prices,negative_volume,high_low_violations,open_close_violations,abnormal_jumps,corporate_actions,status,anomalies_count
+HDFCBANK,1241,2021-09-16,2026-09-16,3,0,0,0,0,0,0,0,0,PASS,1
+ICICIBANK,1241,2021-09-16,2026-09-16,3,0,0,0,0,0,0,0,0,PASS,1
+INFY,1241,2021-09-16,2026-09-16,3,0,0,0,0,0,0,0,0,PASS,1
+RELIANCE,1241,2021-09-16,2026-09-16,3,0,0,0,0,0,0,0,0,PASS,1
+TCS,1241,2021-09-16,2026-09-16,3,0,0,0,0,0,0,0,0,PASS,1
