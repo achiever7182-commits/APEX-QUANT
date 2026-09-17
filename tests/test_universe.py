@@ -225,6 +225,65 @@ def test_get_tradable_instruments_historical_as_of_date():
     symbols_2023 = {i.symbol for i in insts_2023}
     
     assert "JIOFIN" not in symbols_2023, "JIOFIN must NOT leak into 2023 historical trading universe"
+    assert "HDFCLTD" in symbols_2023, "HDFCLTD must be in 2023 historical universe"
+
+    # Verify that HDFCLTD is marked is_tradable=True as of 2023-01-15 (date-aware tradability)
+    hdfc_inst = [i for i in insts_2023 if i.symbol == "HDFCLTD"][0]
+    assert hdfc_inst.is_tradable is True, "HDFCLTD must be tradable on historical date prior to delisting"
+
+
+def test_get_all_symbols_includes_historical_constituents():
+    """Verify get_all_symbols returns all catalog equities including historical/delisted constituents."""
+    manager = UniverseManager()
+    all_symbols = manager.get_all_symbols()
+
+    # Catalog contains 52 stocks (49 active + 3 historical: HDFCLTD, DHFL, YESBANK)
+    assert len(all_symbols) == 52
+    assert "HDFCLTD" in all_symbols, "HDFCLTD must be present in get_all_symbols (no survivorship bias)"
+    assert "DHFL" in all_symbols, "DHFL must be present in get_all_symbols (no survivorship bias)"
+    assert "YESBANK" in all_symbols, "YESBANK must be present in get_all_symbols"
+    assert "RELIANCE" in all_symbols
+    assert "TCS" in all_symbols
+
+
+def test_historical_is_tradable_date_aware():
+    """Verify Stock.is_tradable_on and to_instrument(as_of_date) reflect historical point-in-time status."""
+    manager = UniverseManager()
+    hdfc_stock = manager.nifty500.get_stock("HDFCLTD")
+    assert hdfc_stock is not None
+    assert hdfc_stock.delisting_date == date(2023, 7, 13)
+
+    # 1. Historical date prior to delisting (2023-01-15) -> tradable
+    assert hdfc_stock.is_tradable_on("2023-01-15") is True
+    inst_prior = hdfc_stock.to_instrument(as_of_date="2023-01-15")
+    assert inst_prior.is_tradable is True
+
+    # 2. Historical date on or after delisting -> not tradable
+    assert hdfc_stock.is_tradable_on("2023-07-13") is False
+    assert hdfc_stock.to_instrument(as_of_date="2023-07-13").is_tradable is False
+    assert hdfc_stock.is_tradable_on("2024-01-15") is False
+    assert hdfc_stock.to_instrument(as_of_date="2024-01-15").is_tradable is False
+
+    # 3. Default call without date returns current status (backward compatibility)
+    assert hdfc_stock.to_instrument().is_tradable is False
+    assert hdfc_stock.is_tradable is False
+
+    # 4. Currently active stock (INFY)
+    infy_stock = manager.nifty500.get_stock("INFY")
+    assert infy_stock is not None
+    assert infy_stock.is_tradable_on("2020-01-01") is True
+    assert infy_stock.is_tradable_on("2024-01-15") is True
+    assert infy_stock.to_instrument(as_of_date="2020-01-01").is_tradable is True
+    assert infy_stock.to_instrument().is_tradable is True
+
+    # 5. Suspended stock behavior (verified repository limitation: no historical suspension dates)
+    susp_stock = Stock(symbol="SUSP", company_name="Suspended Co", listing_status=ListingStatus.SUSPENDED)
+    assert susp_stock.is_tradable_on("2023-01-15") is False
+    assert susp_stock.to_instrument(as_of_date="2023-01-15").is_tradable is False
+
+    # 6. Delisted stock with no explicit delisting date
+    delist_no_date = Stock(symbol="NODATE", company_name="No Date Co", listing_status=ListingStatus.DELISTED)
+    assert delist_no_date.is_tradable_on("2020-01-01") is False
 
 
 def test_get_eligible_universe_end_to_end_with_parquet():
@@ -244,6 +303,112 @@ def test_get_eligible_universe_end_to_end_with_parquet():
     rejected_results = [r for r in results if not r.is_eligible]
     assert len(rejected_results) > 0
     assert any("no_price_data" in r.rejection_reasons for r in rejected_results)
+
+
+def test_liquidity_chronological_sorting_unsorted_data():
+    """
+    Test that LiquidityEngine sorts timestamps chronologically before lookback slicing:
+    - Passes intentionally reversed/shuffled data.
+    - Slices the true chronological most recent bars.
+    - Correctly calculates last_close and metrics based on latest chronological bar.
+    - Handles empty data safely.
+    - Prevents future-data leakage when as_of_date is specified.
+    """
+    # 5 bars with timestamps in reverse order: 2024-01-05 down to 2024-01-01
+    dates = pd.to_datetime(["2024-01-05", "2024-01-04", "2024-01-03", "2024-01-02", "2024-01-01"])
+    closes = [500.0, 400.0, 300.0, 200.0, 100.0]
+    volumes = [10_000.0, 10_000.0, 10_000.0, 10_000.0, 10_000.0]
+    
+    unsorted_df = pd.DataFrame({
+        "timestamp": dates,
+        "close": closes,
+        "volume": volumes,
+    })
+
+    # Lookback 2 bars:
+    # If unsorted, tail(2) would pick rows 3 & 4 (2024-01-02 and 2024-01-01, close 200 and 100).
+    # With chronological sorting, tail(2) must pick 2024-01-04 and 2024-01-05 (close 400 and 500).
+    metrics = LiquidityEngine.calculate_metrics("UNSORTED_TEST", unsorted_df, lookback_bars=2)
+    assert metrics.valid_sessions == 2
+    assert metrics.last_close == 500.0
+    assert metrics.median_turnover == 4_500_000.0  # median(400*10k, 500*10k) = 4.5M
+
+    # Test future data leakage prevention with as_of_date
+    metrics_cutoff = LiquidityEngine.calculate_metrics(
+        "UNSORTED_TEST",
+        unsorted_df,
+        lookback_bars=2,
+        as_of_date="2024-01-03",
+    )
+    # With cutoff 2024-01-03, bars after 2024-01-03 are excluded.
+    # Most recent 2 bars are 2024-01-02 and 2024-01-03.
+    assert metrics_cutoff.last_close == 300.0
+
+    # Test empty data handling safely
+    empty_metrics = LiquidityEngine.calculate_metrics("EMPTY_TEST", pd.DataFrame())
+    assert empty_metrics.valid_sessions == 0
+    assert empty_metrics.missing_percentage == 1.0
+    assert empty_metrics.median_turnover == 0.0
+    assert empty_metrics.last_close == 0.0
+
+
+def test_liquidity_calendar_gaps_and_holidays():
+    """
+    Test calendar-gap handling in LiquidityEngine:
+    a) Normal consecutive trading sessions (0% missing).
+    b) A large calendar gap (detected as missing sessions).
+    c) Weekends and NSE statutory holidays not counted as missing sessions.
+    """
+    from data.market.calendar import NSEMarketCalendar
+
+    cal = NSEMarketCalendar()
+
+    # a) Normal consecutive trading sessions
+    # 2024-02-01 (Thu), 2024-02-02 (Fri), 2024-02-05 (Mon), 2024-02-06 (Tue), 2024-02-07 (Wed)
+    consec_days = cal.get_trading_days("2024-02-01", "2024-02-07")
+    assert len(consec_days) == 5
+    df_consec = pd.DataFrame({
+        "timestamp": pd.to_datetime(consec_days),
+        "close": [100.0] * 5,
+        "volume": [10_000.0] * 5,
+    })
+    metrics_consec = LiquidityEngine.calculate_metrics("CONSEC", df_consec, lookback_bars=5)
+    assert metrics_consec.valid_sessions == 5
+    assert metrics_consec.missing_percentage == 0.0
+
+    # b) Large calendar gap (e.g. 10 bars in Jan 2024, 10 bars in April 2024)
+    # Missing all of February and March (~40 trading sessions)
+    jan_days = cal.get_trading_days("2024-01-01", "2024-01-15")[:10]
+    apr_days = cal.get_trading_days("2024-04-01", "2024-04-16")[:10]
+    gap_days = jan_days + apr_days
+    df_gap = pd.DataFrame({
+        "timestamp": pd.to_datetime(gap_days),
+        "close": [100.0] * 20,
+        "volume": [10_000.0] * 20,
+    })
+    metrics_gap = LiquidityEngine.calculate_metrics("GAP_TEST", df_gap, lookback_bars=20)
+    assert metrics_gap.valid_sessions == 20
+    # Over the span Jan 1 to Apr 16, there are ~70 trading days, so ~50 are missing.
+    assert metrics_gap.missing_percentage > 0.50
+
+    # c) Weekends and official NSE holidays should NOT be counted as missing
+    # Jan 26, 2024 is an official NSE holiday (Republic Day)
+    # Jan 22, 2024 is an official NSE holiday
+    # Jan 27-28 are Saturday & Sunday
+    # The actual official trading days in this window are Jan 23, Jan 24, Jan 25, Jan 29 (4 days).
+    official_trading_days = cal.get_trading_days("2024-01-22", "2024-01-29")
+    df_holidays = pd.DataFrame({
+        "timestamp": pd.to_datetime(official_trading_days),
+        "close": [150.0] * len(official_trading_days),
+        "volume": [20_000.0] * len(official_trading_days),
+    })
+    metrics_holidays = LiquidityEngine.calculate_metrics(
+        "HOLIDAY_TEST",
+        df_holidays,
+        lookback_bars=len(official_trading_days),
+    )
+    assert metrics_holidays.valid_sessions == len(official_trading_days)
+    assert metrics_holidays.missing_percentage == 0.0
 
 
 if __name__ == "__main__":
@@ -267,6 +432,14 @@ if __name__ == "__main__":
     print("  [OK] test_universe_manager_end_to_end")
     test_get_tradable_instruments_historical_as_of_date()
     print("  [OK] test_get_tradable_instruments_historical_as_of_date")
+    test_get_all_symbols_includes_historical_constituents()
+    print("  [OK] test_get_all_symbols_includes_historical_constituents")
+    test_historical_is_tradable_date_aware()
+    print("  [OK] test_historical_is_tradable_date_aware")
     test_get_eligible_universe_end_to_end_with_parquet()
     print("  [OK] test_get_eligible_universe_end_to_end_with_parquet")
+    test_liquidity_chronological_sorting_unsorted_data()
+    print("  [OK] test_liquidity_chronological_sorting_unsorted_data")
+    test_liquidity_calendar_gaps_and_holidays()
+    print("  [OK] test_liquidity_calendar_gaps_and_holidays")
     print("\nAll Universe Management tests PASSED successfully.")

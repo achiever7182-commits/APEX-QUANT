@@ -38,6 +38,10 @@ class Nifty500:
         clean = symbol.upper().replace(".NS", "").strip()
         return self._stocks_by_symbol.get(clean)
 
+    def get_all_symbols(self) -> List[str]:
+        """Return all distinct symbols registered in repository across all time."""
+        return sorted(self._stocks_by_symbol.keys())
+
     def get_point_in_time_constituents(self, as_of_date: Union[date, datetime, str]) -> UniverseSnapshot:
         """
         Reconstruct NIFTY 500 constituents strictly on as_of_date.

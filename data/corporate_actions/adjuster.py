@@ -32,6 +32,7 @@ class CorporateActionAdjuster:
         df: pd.DataFrame,
         corporate_actions: Sequence[CorporateAction],
         adjust_dividends: bool = False,
+        adjust_splits: bool = True,
     ) -> pd.DataFrame:
         """
         Adjust raw OHLCV DataFrame with corporate actions.
@@ -40,6 +41,9 @@ class CorporateActionAdjuster:
             df: DataFrame containing at minimum ['timestamp', 'open', 'high', 'low', 'close', 'volume']
             corporate_actions: List of CorporateAction objects for this symbol
             adjust_dividends: If True, also apply proportional dividend adjustments
+            adjust_splits: If True, apply split/bonus adjustments. If False (e.g. input bars
+                           are already split-adjusted by the provider), splits are not re-applied,
+                           preventing double adjustment.
             
         Returns:
             New DataFrame with raw prices intact plus new columns:
@@ -74,11 +78,12 @@ class CorporateActionAdjuster:
                 continue
 
             if action.action_type in (CorporateActionType.SPLIT, CorporateActionType.BONUS):
-                mult = action.split_multiplier
-                if mult > 0:
-                    # Bars before ex_date need to be adjusted by dividing price by mult
-                    # So cumulative split factor multiplies by mult
-                    cum_split_factor[mask_before] *= mult
+                if adjust_splits:
+                    mult = action.split_multiplier
+                    if mult > 0:
+                        # Bars before ex_date need to be adjusted by dividing price by mult
+                        # So cumulative split factor multiplies by mult
+                        cum_split_factor[mask_before] *= mult
 
             elif action.action_type == CorporateActionType.DIVIDEND and adjust_dividends:
                 div_val = action.value

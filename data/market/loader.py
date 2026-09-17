@@ -47,11 +47,13 @@ class MarketDataLoader:
         storage: Optional[ParquetMarketDataStorage] = None,
         actions_loader: Optional[CorporateActionsLoader] = None,
         validator: Optional[DataQualityValidator] = None,
+        adjust_splits: Optional[bool] = None,
     ) -> None:
         self.provider = provider or YahooFinanceProvider()
         self.storage = storage or ParquetMarketDataStorage()
         self.actions_loader = actions_loader or CorporateActionsLoader()
         self.validator = validator or DataQualityValidator()
+        self._adjust_splits_override = adjust_splits
 
     def ingest_symbol(
         self,
@@ -81,7 +83,20 @@ class MarketDataLoader:
             logger.info(f"Recorded {len(actions)} corporate action events for {canonical}.")
 
         # 4. Apply deterministic corporate action adjustments
-        adjusted_df = CorporateActionAdjuster.adjust_historical_bars(raw_df, actions, adjust_dividends=False)
+        # Check provider contract: if provider bars are already split-adjusted (e.g. Yahoo Finance),
+        # do not re-apply splits to prevent double adjustment.
+        if self._adjust_splits_override is not None:
+            should_adjust_splits = self._adjust_splits_override
+        else:
+            is_provider_split_adjusted = getattr(self.provider, "is_split_adjusted", False)
+            should_adjust_splits = not is_provider_split_adjusted
+
+        adjusted_df = CorporateActionAdjuster.adjust_historical_bars(
+            raw_df,
+            actions,
+            adjust_dividends=False,
+            adjust_splits=should_adjust_splits,
+        )
 
         # 5. Normalize schema, types, and verify OHLC integrity
         clean_df, norm_logs = DataNormalizer.normalize(adjusted_df, symbol=canonical)

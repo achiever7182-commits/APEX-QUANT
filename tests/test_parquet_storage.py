@@ -152,6 +152,47 @@ def test_eod_calendar_date_inclusion_and_no_future_leak():
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def test_symbol_column_consistency():
+    """Verify symbol column availability across read, query_by_symbol, and legacy file reads."""
+    temp_dir = Path(tempfile.mkdtemp(prefix="apex_test_parquet_"))
+    try:
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+
+        storage = ParquetMarketDataStorage(base_dir=temp_dir)
+
+        # Simulate a legacy Parquet file written WITHOUT a symbol column inside the file
+        legacy_dir = temp_dir / "adjusted" / "symbol=INFY"
+        legacy_dir.mkdir(parents=True, exist_ok=True)
+        legacy_df = pd.DataFrame({
+            "timestamp": pd.to_datetime(["2024-01-01", "2024-01-02"]),
+            "open": [1500.0, 1510.0],
+            "high": [1520.0, 1530.0],
+            "low": [1490.0, 1500.0],
+            "close": [1510.0, 1520.0],
+            "volume": [500_000.0, 600_000.0],
+        })
+        # Write directly via pyarrow without symbol column in table
+        pq.write_table(pa.Table.from_pandas(legacy_df), legacy_dir / "data.parquet")
+
+        # 1. read() must inject symbol column
+        df_read = storage.read("INFY", is_adjusted=True)
+        assert "symbol" in df_read.columns
+        assert (df_read["symbol"] == "INFY").all()
+
+        # 2. query_by_symbol() must inject symbol column
+        df_query = storage.query_by_symbol("INFY", is_adjusted=True)
+        assert "symbol" in df_query.columns
+        assert (df_query["symbol"] == "INFY").all()
+
+        # 3. query_by_date_range() must contain symbol column
+        df_range = storage.query_by_date_range(["INFY"], start_date="2024-01-01", end_date="2024-01-02")
+        assert "symbol" in df_range.columns
+        assert (df_range["symbol"] == "INFY").all()
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 if __name__ == "__main__":
     test_parquet_round_trip()
     print("  [OK] test_parquet_round_trip")
@@ -163,4 +204,6 @@ if __name__ == "__main__":
     print("  [OK] test_storage_status_inspection")
     test_eod_calendar_date_inclusion_and_no_future_leak()
     print("  [OK] test_eod_calendar_date_inclusion_and_no_future_leak")
+    test_symbol_column_consistency()
+    print("  [OK] test_symbol_column_consistency")
     print("\nAll Parquet Storage tests PASSED successfully.")
