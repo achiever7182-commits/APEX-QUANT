@@ -42,8 +42,12 @@ class IUniverseManager(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_tradable_instruments(self, filter_criteria: Optional[UniverseFilter] = None) -> List[Instrument]:
-        """Return filtered instruments that qualify for trading."""
+    def get_tradable_instruments(
+        self,
+        filter_criteria: Optional[UniverseFilter] = None,
+        as_of_date: Optional[Union[date, str]] = None,
+    ) -> List[Instrument]:
+        """Return filtered instruments that qualify for trading as of a specific date (defaults to today)."""
         raise NotImplementedError
 
     @abstractmethod

@@ -7,6 +7,7 @@ supporting efficient range queries across hundreds of Indian equities without ex
 
 from __future__ import annotations
 
+from datetime import date, datetime
 import logging
 import os
 from pathlib import Path
@@ -119,12 +120,21 @@ class ParquetMarketDataStorage:
     def query_by_symbol(
         self,
         symbol: str,
-        start_date: Optional[Union[str, pd.Timestamp]] = None,
-        end_date: Optional[Union[str, pd.Timestamp]] = None,
+        start_date: Optional[Union[str, date, pd.Timestamp]] = None,
+        end_date: Optional[Union[str, date, pd.Timestamp]] = None,
         is_adjusted: bool = True,
     ) -> pd.DataFrame:
         """
         Query historical bars for a single symbol with date slicing.
+        
+        Date Convention:
+        - When start_date / end_date is a calendar date (e.g. '2024-01-15' or datetime.date):
+            Slices by calendar date: timestamp.date() <= end_date.
+            This allows a post-market query on 2024-01-15 to include the complete daily bar
+            belonging to that date, while strictly excluding any future calendar dates.
+            For pre-market evaluations, callers should supply the previous trading day as end_date.
+        - When an explicit intraday timestamp is provided (e.g. '2024-01-15 11:30:00'):
+            Slices by precise timestamp: timestamp <= dt_end.
         """
         df = self.read(symbol, is_adjusted=is_adjusted)
         if df.empty:
@@ -133,20 +143,44 @@ class ParquetMarketDataStorage:
         ts_tz = df["timestamp"].dt.tz
 
         if start_date:
-            dt_start = pd.to_datetime(start_date)
-            if ts_tz is not None and dt_start.tzinfo is None:
-                dt_start = dt_start.tz_localize(ts_tz)
-            elif ts_tz is None and dt_start.tzinfo is not None:
-                dt_start = dt_start.tz_localize(None)
-            df = df[df["timestamp"] >= dt_start]
+            is_cal_start = False
+            cal_start = None
+            if isinstance(start_date, date) and not isinstance(start_date, datetime):
+                is_cal_start = True
+                cal_start = start_date
+            elif isinstance(start_date, str) and len(start_date.strip().split("T")[0].split(" ")[0]) == len(start_date.strip()):
+                is_cal_start = True
+                cal_start = pd.to_datetime(start_date).date()
+
+            if is_cal_start and cal_start is not None:
+                df = df[df["timestamp"].dt.date >= cal_start]
+            else:
+                dt_start = pd.to_datetime(start_date)
+                if ts_tz is not None and dt_start.tzinfo is None:
+                    dt_start = dt_start.tz_localize(ts_tz)
+                elif ts_tz is None and dt_start.tzinfo is not None:
+                    dt_start = dt_start.tz_localize(None)
+                df = df[df["timestamp"] >= dt_start]
 
         if end_date:
-            dt_end = pd.to_datetime(end_date)
-            if ts_tz is not None and dt_end.tzinfo is None:
-                dt_end = dt_end.tz_localize(ts_tz)
-            elif ts_tz is None and dt_end.tzinfo is not None:
-                dt_end = dt_end.tz_localize(None)
-            df = df[df["timestamp"] <= dt_end]
+            is_cal_end = False
+            cal_end = None
+            if isinstance(end_date, date) and not isinstance(end_date, datetime):
+                is_cal_end = True
+                cal_end = end_date
+            elif isinstance(end_date, str) and len(end_date.strip().split("T")[0].split(" ")[0]) == len(end_date.strip()):
+                is_cal_end = True
+                cal_end = pd.to_datetime(end_date).date()
+
+            if is_cal_end and cal_end is not None:
+                df = df[df["timestamp"].dt.date <= cal_end]
+            else:
+                dt_end = pd.to_datetime(end_date)
+                if ts_tz is not None and dt_end.tzinfo is None:
+                    dt_end = dt_end.tz_localize(ts_tz)
+                elif ts_tz is None and dt_end.tzinfo is not None:
+                    dt_end = dt_end.tz_localize(None)
+                df = df[df["timestamp"] <= dt_end]
 
         return df.reset_index(drop=True)
 

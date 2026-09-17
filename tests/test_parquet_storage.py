@@ -117,6 +117,41 @@ def test_storage_status_inspection():
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def test_eod_calendar_date_inclusion_and_no_future_leak():
+    """Verify that calendar date queries include the day's bar and strictly exclude future dates."""
+    temp_dir = Path(tempfile.mkdtemp(prefix="apex_test_parquet_"))
+    try:
+        storage = ParquetMarketDataStorage(base_dir=temp_dir)
+        # Daily bars with 03:45 UTC timestamp (standard Yahoo Finance market open time)
+        df = pd.DataFrame({
+            "timestamp": pd.to_datetime([
+                "2024-01-12 03:45:00+00:00",  # Friday
+                "2024-01-15 03:45:00+00:00",  # Monday
+                "2024-01-16 03:45:00+00:00",  # Tuesday (Future)
+            ]),
+            "open": [100.0, 102.0, 104.0],
+            "high": [105.0, 106.0, 107.0],
+            "low": [98.0, 101.0, 103.0],
+            "close": [103.0, 105.0, 106.0],
+            "volume": [1000.0, 1200.0, 1500.0],
+        })
+        storage.write(df, "RELIANCE", is_adjusted=True)
+
+        # Calendar date query for 2024-01-15
+        sliced = storage.query_by_symbol("RELIANCE", end_date="2024-01-15")
+        
+        # 1. Verify 2024-01-15 is included
+        assert len(sliced) == 2
+        assert str(sliced.iloc[1]["timestamp"].date()) == "2024-01-15"
+        assert sliced.iloc[1]["close"] == 105.0
+
+        # 2. Verify future date (2024-01-16) is strictly excluded
+        assert (sliced["timestamp"].dt.date <= pd.to_datetime("2024-01-15").date()).all()
+        assert "2024-01-16" not in [str(d) for d in sliced["timestamp"].dt.date]
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 if __name__ == "__main__":
     test_parquet_round_trip()
     print("  [OK] test_parquet_round_trip")
@@ -126,4 +161,6 @@ if __name__ == "__main__":
     print("  [OK] test_query_cross_sectional_panel")
     test_storage_status_inspection()
     print("  [OK] test_storage_status_inspection")
+    test_eod_calendar_date_inclusion_and_no_future_leak()
+    print("  [OK] test_eod_calendar_date_inclusion_and_no_future_leak")
     print("\nAll Parquet Storage tests PASSED successfully.")
