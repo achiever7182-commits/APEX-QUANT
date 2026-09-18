@@ -26,6 +26,14 @@ from execution.paper.telemetry import (
     PaperOperationalTelemetry,
     get_global_paper_telemetry,
 )
+from execution.paper.daemon import (
+    DaemonConfig,
+    DaemonMode,
+    DaemonStatus,
+    HeartbeatData,
+    PaperTradingDaemon,
+    SoakReport,
+)
 
 __all__ = [
     "CycleResult",
@@ -44,4 +52,10 @@ __all__ = [
     "get_global_simulation_engine",
     "PaperOperationalTelemetry",
     "get_global_paper_telemetry",
+    "DaemonConfig",
+    "DaemonMode",
+    "DaemonStatus",
+    "HeartbeatData",
+    "PaperTradingDaemon",
+    "SoakReport",
 ]

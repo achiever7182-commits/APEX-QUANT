@@ -30,6 +30,7 @@ MODES = {
     "realtime":  "main_realtime",
     "terminal":  "main_terminal_live",
     "dashboard": "main_terminal_live",
+    "paper":     "execution.paper.daemon",
 }
 
 HELP = f"""\
@@ -43,25 +44,32 @@ Modes:
   realtime   - Tick-by-tick scrolling dashboard via WebSocket
   terminal   - Full-screen Rich Live TUI via WebSocket
   dashboard  - terminal mode + live web dashboard in browser
+  paper      - APEX-QUANT Indian equities autonomous paper trading daemon
 
 Flags:
   --strategy <name>   Strategy to use. See --list-strategies for all options.
-  --symbol <pair>     Trading pair (default: BTC/USDT)
+  --symbol <pair>     Trading pair (default: BTC/USDT, or comma-separated symbols for paper)
   --no-trade          Dry-run mode: log signals but place NO real orders
   --no-browser        Don't auto-open browser (dashboard mode only)
   --list-strategies   List all available strategies and exit
+  --accelerated       Run paper trading in accelerated simulated time
+  --interval <sec>    Cycle interval in seconds for paper daemon (default: 60.0)
+  --soak <N>          Run an endurance soak test with N cycles and exit
+  --capital <amount>  Initial capital for paper trading (default: 1,000,000)
 
 Examples:
   python run.py realtime --strategy rsi
   python run.py polling  --strategy macd --symbol ETH/USDT
   python run.py terminal --no-trade
   python run.py dashboard
+  python run.py paper --soak 25
+  python run.py paper --accelerated --interval 5
 
 Backtest any strategy before going live:
   python backtest.py --strategy rsi --candles 1000
   python backtest.py --list
 
-Set API keys before running:
+Set API keys before running (crypto modes only):
   BINANCE_TESTNET_API_KEY=...
   BINANCE_TESTNET_API_SECRET=...
   (or copy .env.example to .env and fill in your keys)
@@ -89,6 +97,14 @@ def parse_args() -> argparse.Namespace:
                         help="Don't auto-open browser (dashboard mode only)")
     parser.add_argument("--list-strategies", "-l", action="store_true",
                         help="List all available strategies and exit")
+    parser.add_argument("--accelerated", action="store_true",
+                        help="Run paper trading in accelerated simulated time")
+    parser.add_argument("--interval", type=float, default=60.0,
+                        help="Cycle interval in seconds for paper daemon (default: 60.0)")
+    parser.add_argument("--soak", type=int, default=None,
+                        help="Run an endurance soak test with N cycles and exit")
+    parser.add_argument("--capital", type=float, default=1_000_000.0,
+                        help="Initial capital for paper trading (default: 1,000,000)")
     parser.add_argument("--help", "-h", action="store_true",
                         help="Show this help message and exit")
     return parser.parse_args()
@@ -112,6 +128,31 @@ def main() -> None:
         print(f"Unknown mode: '{mode}'")
         print(f"Valid modes: {', '.join(MODES.keys())}")
         sys.exit(1)
+
+    if mode == "paper":
+        from execution.paper.daemon import DaemonConfig, DaemonMode, PaperTradingDaemon
+        daemon_mode = DaemonMode.ACCELERATED if args.accelerated or args.soak else DaemonMode.WALL_CLOCK
+        cfg = DaemonConfig(
+            mode=daemon_mode,
+            cycle_interval_seconds=args.interval,
+            max_cycles=args.soak,
+            initial_capital=args.capital,
+            force_market_open=args.accelerated or (args.soak is not None),
+        )
+        if args.symbol:
+            cfg.symbols = [s.strip() for s in args.symbol.split(",") if s.strip()]
+        daemon = PaperTradingDaemon(config=cfg)
+        if args.soak:
+            print(f"[run] Starting APEX-QUANT Paper Soak Run ({args.soak} cycles)...")
+            report = daemon.run_soak(num_cycles=args.soak)
+            print(f"[run] Soak Run complete. All invariants passed: {report.all_invariants_passed}")
+            print(f"      Initial: ₹{report.initial_equity:,.2f} -> Final: ₹{report.final_equity:,.2f} ({report.total_return_pct:+.2f}%)")
+            print(f"      Orders: {report.orders_filled}/{report.orders_generated} filled")
+            return
+        else:
+            print(f"[run] Starting APEX-QUANT Paper Trading Daemon ({daemon_mode.value})...")
+            daemon.start(blocking=True)
+            return
 
     if not validate_keys():
         sys.exit(1)
