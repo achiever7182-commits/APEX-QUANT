@@ -75,6 +75,7 @@ from execution.paper.models import (
     PortfolioDecision,
     SignalSnapshot,
 )
+from execution.paper.telemetry import PaperOperationalTelemetry, get_global_paper_telemetry
 from execution.paper_broker import PaperBroker
 from execution.persistence import PaperStatePersistence
 from execution.reconciliation import ReconciliationEngine
@@ -122,11 +123,13 @@ class PaperTradingOrchestrator:
         slippage_bps: float = 5.0,
         max_staleness_seconds: float = 300.0,
         auto_load_state: bool = True,
+        telemetry: Optional[PaperOperationalTelemetry] = None,
     ):
         self.initial_capital = float(initial_capital)
         self.data_dir = data_dir
         self.max_staleness_seconds = float(max_staleness_seconds)
         self.sector_lookup = dict(sector_lookup or DEFAULT_SECTOR_LOOKUP)
+        self.telemetry: PaperOperationalTelemetry = telemetry or get_global_paper_telemetry()
 
         # 1. State Persistence & Kill Switch
         self.persistence: PaperStatePersistence = persistence or PaperStatePersistence(data_dir=data_dir)
@@ -212,6 +215,7 @@ class PaperTradingOrchestrator:
 
                 # Execute startup reconciliation
                 recon = self.reconcile_state()
+                self.telemetry.record_restart_recovery()
                 logger.info(
                     f"PaperTradingOrchestrator restored state: equity=₹{account.total_equity:,.2f}, "
                     f"positions={len(positions)}, reconciliation={'CLEAN' if recon.is_clean else 'DISCREPANCY'}"
@@ -237,6 +241,7 @@ class PaperTradingOrchestrator:
             expected_cash=expected_cash,
         )
         self._latest_reconciliation = report
+        self.telemetry.record_reconciliation(report.status.value, has_error=not report.is_clean)
         return report
 
     def run_cycle(
@@ -280,6 +285,7 @@ class PaperTradingOrchestrator:
         # Idempotency check: Skip if already executed
         if cycle_id in self._executed_cycles:
             logger.warning(f"Cycle {cycle_id} has already been processed. Skipping duplicate execution.")
+            self.telemetry.record_orders(duplicates=1)
             res = CycleResult(
                 cycle_id=cycle_id,
                 state=CycleState.ALREADY_PROCESSED,
@@ -423,6 +429,7 @@ class PaperTradingOrchestrator:
             )
         except Exception as e:
             logger.error(f"ML prediction failure in cycle {cycle_id}: {e}")
+            self.telemetry.record_model_error(str(e))
             res = CycleResult(
                 cycle_id=cycle_id,
                 state=CycleState.MODEL_FAILED,
@@ -478,6 +485,7 @@ class PaperTradingOrchestrator:
                 ranked_universe.timestamp = t_pd
         except Exception as e:
             logger.error(f"Ranking failure in cycle {cycle_id}: {e}")
+            self.telemetry.record_model_error(str(e))
             res = CycleResult(
                 cycle_id=cycle_id,
                 state=CycleState.MODEL_FAILED,
@@ -531,6 +539,7 @@ class PaperTradingOrchestrator:
             )
         except Exception as e:
             logger.error(f"Portfolio construction failure in cycle {cycle_id}: {e}")
+            self.telemetry.record_execution_error(str(e))
             res = CycleResult(
                 cycle_id=cycle_id,
                 state=CycleState.PORTFOLIO_FAILED,
@@ -644,6 +653,20 @@ class PaperTradingOrchestrator:
 
         self._executed_cycles.add(cycle_id)
         duration_ms = (time.perf_counter() - start_t) * 1000.0
+
+        filled_count = sum(1 for o in executed_orders if o.status == OrderStatus.FILLED)
+        rejected_count = len(orders_rejected)
+        self.telemetry.record_cycle_completed(cycle_id, duration_ms)
+        self.telemetry.record_orders(
+            generated=len(orders_generated),
+            filled=filled_count,
+            rejected=rejected_count,
+            risk_rejections=rejected_count,
+        )
+        self.telemetry.record_symbols(
+            processed=len(eligible_stocks),
+            rejected=len(excluded_stocks),
+        )
 
         res = CycleResult(
             cycle_id=cycle_id,

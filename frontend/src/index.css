@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-quant-bg text-quant-textPrimary antialiased selection:bg-quant-cyan selection:text-quant-bg overflow-x-hidden;
+  }
+}
+
+/* Custom scrollbar for dark terminal look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2c48;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2c3e66;
+}
+
+/* Quant Terminal card styling */
+.quant-card {
+  @apply bg-quant-card border border-quant-border rounded-lg shadow-lg;
+}
+
+.quant-card:hover {
+  @apply border-quant-borderBright;
+}
+
+/* Number display utility */
+.font-metric {
+  @apply font-mono tracking-tight;
+}
+
+/* Pulse animation for live feed */
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.92); }
+}
+
+.animate-pulse-cyan {
+  animation: pulse-cyan 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

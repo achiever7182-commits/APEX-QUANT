@@ -33,7 +33,10 @@ class PaperStatePersistence:
         self.orders_file: str = os.path.join(data_dir, "orders.json")
         self.fills_file: str = os.path.join(data_dir, "fills.json")
         self.events_file: str = os.path.join(data_dir, "events.jsonl")
+        self.telemetry_file: str = os.path.join(data_dir, "telemetry.json")
+        self.sessions_dir: str = os.path.join(data_dir, "sessions")
         os.makedirs(self.data_dir, exist_ok=True)
+        os.makedirs(self.sessions_dir, exist_ok=True)
 
     def _atomic_write_json(self, file_path: str, data: Any) -> None:
         """Atomically write data to disk via temporary file."""
@@ -120,3 +123,72 @@ class PaperStatePersistence:
             raise RuntimeError(f"Failed to load paper state from disk: {e}")
 
         return account, positions, orders, fills
+
+    def save_session(self, session: Any) -> None:
+        """Atomically persist session record to data/paper/sessions/session_<id>.json."""
+        s_dict = session.to_dict() if hasattr(session, "to_dict") else dict(session)
+        sid = s_dict.get("session_id", "unknown")
+        # Sanitize session_id for filesystem
+        safe_sid = sid.replace(":", "_").replace("/", "_").replace("\\", "_")
+        file_path = os.path.join(self.sessions_dir, f"session_{safe_sid}.json")
+        self._atomic_write_json(file_path, s_dict)
+
+    def load_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Load session record from disk by session ID."""
+        safe_sid = session_id.replace(":", "_").replace("/", "_").replace("\\", "_")
+        file_path = os.path.join(self.sessions_dir, f"session_{safe_sid}.json")
+        if not os.path.exists(file_path):
+            return None
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return None
+
+    def list_sessions(self) -> List[Dict[str, Any]]:
+        """List all persisted paper trading sessions ordered by start_time descending."""
+        if not os.path.exists(self.sessions_dir):
+            return []
+        sessions: List[Dict[str, Any]] = []
+        for fname in os.listdir(self.sessions_dir):
+            if fname.startswith("session_") and fname.endswith(".json"):
+                fpath = os.path.join(self.sessions_dir, fname)
+                try:
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        sessions.append(data)
+                except Exception:
+                    continue
+        # Sort descending by start_time or simulation_date
+        sessions.sort(key=lambda s: s.get("start_time") or s.get("simulation_date", ""), reverse=True)
+        return sessions
+
+    def save_telemetry(self, telemetry_data: Dict[str, Any]) -> None:
+        """Atomically persist operational telemetry snapshot."""
+        self._atomic_write_json(self.telemetry_file, telemetry_data)
+
+    def load_telemetry(self) -> Optional[Dict[str, Any]]:
+        """Load persisted operational telemetry if available."""
+        if not os.path.exists(self.telemetry_file):
+            return None
+        try:
+            with open(self.telemetry_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return None
+
+    def reset_state(self) -> None:
+        """Wipe all paper state files for testing or fresh setup."""
+        for f in [self.account_file, self.positions_file, self.orders_file, self.fills_file, self.events_file, self.telemetry_file]:
+            if os.path.exists(f):
+                try:
+                    os.remove(f)
+                except OSError:
+                    pass
+        if os.path.exists(self.sessions_dir):
+            for fname in os.listdir(self.sessions_dir):
+                if fname.endswith(".json"):
+                    try:
+                        os.remove(os.path.join(self.sessions_dir, fname))
+                    except OSError:
+                        pass

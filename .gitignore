@@ -53,3 +53,6 @@ trade_log_archive_*.csv
 
 # Paper trading runtime state
 data/paper/
+
+frontend/node_modules/
+frontend/dist/
