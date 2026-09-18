@@ -260,7 +260,184 @@ def dashboard_compact():
     return send_from_directory(_STATIC_DIR, "index.html")
 
 
-# ── API ROUTES ──
+@app.route("/paper")
+def paper_dashboard():
+    """Serve the isolated Indian Equities Paper Trading terminal."""
+    return send_from_directory(_STATIC_DIR, "paper.html")
+
+
+# ── PAPER TRADING API ROUTES (INDIAN EQUITIES ISOLATED) ──
+
+_PAPER_DATA_DIR = os.path.join(_PROJECT_ROOT, "data", "paper")
+
+
+@app.route("/api/paper/summary")
+def api_paper_summary():
+    """Return account telemetry, cash, equity, daily P&L, drawdown, and kill-switch status."""
+    try:
+        from execution.persistence import PaperStatePersistence
+        from risk.kill_switch import PersistentKillSwitch
+        from execution.data_adapter import MarketDataSafetyAdapter
+
+        persistence = PaperStatePersistence(data_dir=_PAPER_DATA_DIR)
+        kill_switch = PersistentKillSwitch(persistence_path=os.path.join(_PAPER_DATA_DIR, "kill_switch.json"))
+        adapter = MarketDataSafetyAdapter()
+
+        account, positions, orders, fills = persistence.load_state()
+        is_mkt_open = adapter.is_market_open()
+
+        if account is None:
+            # Default initial state
+            return jsonify({
+                "mode": "PAPER_TRADING",
+                "market_open": is_mkt_open,
+                "kill_switch": kill_switch.get_status(),
+                "broker": {
+                    "name": "PaperBroker",
+                    "trading_mode": "paper",
+                    "connection_status": "CONNECTED",
+                    "supports_live_orders": False,
+                },
+                "initial_capital": 1_000_000.0,
+                "cash": 1_000_000.0,
+                "positions_value": 0.0,
+                "total_equity": 1_000_000.0,
+                "daily_pnl": 0.0,
+                "realized_pnl": 0.0,
+                "unrealized_pnl": 0.0,
+                "total_fees": 0.0,
+                "total_slippage": 0.0,
+                "max_drawdown": 0.0,
+                "positions_count": 0,
+                "positions": [],
+                "last_reconciliation": {"status": "MATCH", "is_clean": True},
+            })
+
+        return jsonify({
+            "mode": "PAPER_TRADING",
+            "market_open": is_mkt_open,
+            "kill_switch": kill_switch.get_status(),
+            "broker": {
+                "name": "PaperBroker",
+                "trading_mode": "paper",
+                "connection_status": "CONNECTED",
+                "supports_live_orders": False,
+            },
+            "initial_capital": account.initial_capital,
+            "cash": account.cash,
+            "positions_value": account.positions_value,
+            "total_equity": account.total_equity,
+            "daily_pnl": account.daily_pnl,
+            "realized_pnl": account.realized_pnl,
+            "unrealized_pnl": account.unrealized_pnl,
+            "total_fees": account.total_fees,
+            "total_slippage": account.total_slippage,
+            "max_drawdown": account.max_drawdown,
+            "positions_count": len(positions),
+            "positions": [p.to_dict() for p in positions.values()],
+            "last_reconciliation": {"status": "MATCH", "is_clean": True},
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/positions")
+def api_paper_positions():
+    """Return active paper positions."""
+    try:
+        from execution.persistence import PaperStatePersistence
+        persistence = PaperStatePersistence(data_dir=_PAPER_DATA_DIR)
+        _, positions, _, _ = persistence.load_state()
+        return jsonify([p.to_dict() for p in positions.values()])
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/orders")
+def api_paper_orders():
+    """Return paper orders."""
+    try:
+        from execution.persistence import PaperStatePersistence
+        persistence = PaperStatePersistence(data_dir=_PAPER_DATA_DIR)
+        _, _, orders, _ = persistence.load_state()
+        return jsonify([o.to_dict() for o in orders.values()])
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/fills")
+def api_paper_fills():
+    """Return paper fills."""
+    try:
+        from execution.persistence import PaperStatePersistence
+        persistence = PaperStatePersistence(data_dir=_PAPER_DATA_DIR)
+        _, _, _, fills = persistence.load_state()
+        return jsonify([f.to_dict() for f in fills])
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/kill_switch", methods=["GET", "POST"])
+def api_paper_kill_switch():
+    """Get status or toggle persistent kill switch."""
+    try:
+        from risk.kill_switch import PersistentKillSwitch
+        ks = PersistentKillSwitch(persistence_path=os.path.join(_PAPER_DATA_DIR, "kill_switch.json"))
+        if request.method == "POST":
+            if ks.is_active():
+                ks.disable(operator="DASHBOARD_USER")
+            else:
+                ks.enable(reason="MANUAL_DASHBOARD_TRIGGER", operator="DASHBOARD_USER")
+        return jsonify(ks.get_status())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# ── REAL-TIME MARKET DATA API ROUTES (INDIAN EQUITIES ISOLATED) ──
+
+@app.route("/api/realtime/health")
+def api_realtime_health():
+    """Return real-time market data feed health, connectivity, and session status."""
+    try:
+        from data.realtime import get_global_health_monitor, get_global_quote_cache, REALTIME_MAX_STALENESS_SECONDS
+        health_monitor = get_global_health_monitor()
+        cache = get_global_quote_cache()
+        summary = health_monitor.get_health_summary(cache=cache, max_staleness_seconds=REALTIME_MAX_STALENESS_SECONDS)
+        return jsonify(summary)
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/realtime/quotes")
+def api_realtime_quotes():
+    """Return latest cached real-time market quotes."""
+    try:
+        from data.realtime import get_global_quote_cache
+        cache = get_global_quote_cache()
+        quotes = cache.get_all_latest()
+        result = {}
+        for sym, q in quotes.items():
+            result[sym] = {
+                "symbol": q.symbol,
+                "exchange": q.exchange,
+                "timestamp": q.timestamp.isoformat() if q.timestamp else None,
+                "last_price": q.last_price,
+                "bid": q.bid,
+                "ask": q.ask,
+                "volume": q.volume,
+                "open": q.open,
+                "high": q.high,
+                "low": q.low,
+                "previous_close": q.previous_close,
+                "data_source": q.data_source,
+                "age_seconds": cache.get_quote_age(sym),
+            }
+        return jsonify({"quotes": result, "count": len(result)})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# ── API ROUTES (LEGACY BINANCE TESTNET BOT) ──
 
 _last_telemetry_time: float = 0.0
 
