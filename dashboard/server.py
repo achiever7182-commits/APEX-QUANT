@@ -393,6 +393,92 @@ def api_paper_kill_switch():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/paper/cycle")
+def api_paper_cycle():
+    """Return latest end-to-end paper trading cycle execution result."""
+    try:
+        from execution.paper import get_global_paper_orchestrator
+        orchestrator = get_global_paper_orchestrator()
+        cycle = orchestrator.get_latest_cycle()
+        if cycle is None:
+            return jsonify({
+                "status": "idle",
+                "message": "No cycle executed yet.",
+                "mode": "PAPER_TRADING",
+                "supports_live_orders": False,
+            })
+        return jsonify(cycle.to_dict())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/signals")
+def api_paper_signals():
+    """Return latest point-in-time ML prediction signals."""
+    try:
+        from execution.paper import get_global_paper_orchestrator
+        orchestrator = get_global_paper_orchestrator()
+        cycle = orchestrator.get_latest_cycle()
+        signals = [s.to_dict() for s in cycle.signals] if cycle else []
+        return jsonify({
+            "mode": "PAPER_TRADING",
+            "cycle_id": cycle.cycle_id if cycle else None,
+            "timestamp": cycle.timestamp if cycle else None,
+            "count": len(signals),
+            "signals": signals,
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/portfolio")
+def api_paper_portfolio():
+    """Return latest portfolio decisions and current vs target allocations."""
+    try:
+        from execution.paper import get_global_paper_orchestrator
+        orchestrator = get_global_paper_orchestrator()
+        cycle = orchestrator.get_latest_cycle()
+        decisions = [d.to_dict() for d in cycle.decisions] if cycle else []
+        account = orchestrator.broker.get_account()
+        positions = orchestrator.broker.get_positions()
+        return jsonify({
+            "mode": "PAPER_TRADING",
+            "cycle_id": cycle.cycle_id if cycle else None,
+            "equity": account.total_equity,
+            "cash": account.cash,
+            "positions_value": account.positions_value,
+            "positions_count": len(positions),
+            "positions": [p.to_dict() for p in positions.values()],
+            "decisions_count": len(decisions),
+            "decisions": decisions,
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/reconciliation")
+def api_paper_reconciliation():
+    """Return latest post-trade reconciliation audit report."""
+    try:
+        from execution.paper import get_global_paper_orchestrator
+        orchestrator = get_global_paper_orchestrator()
+        recon = orchestrator.reconcile_state()
+        return jsonify(recon.to_dict())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/paper/health")
+def api_paper_health():
+    """Return unified operational health for the paper trading ecosystem."""
+    try:
+        from execution.paper import get_global_paper_orchestrator
+        orchestrator = get_global_paper_orchestrator()
+        return jsonify(orchestrator.get_health_summary())
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 # ── REAL-TIME MARKET DATA API ROUTES (INDIAN EQUITIES ISOLATED) ──
 
 @app.route("/api/realtime/health")

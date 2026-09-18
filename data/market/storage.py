@@ -98,6 +98,8 @@ class ParquetMarketDataStorage:
         if not df.empty and "timestamp" in df.columns:
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             df = df.sort_values("timestamp").reset_index(drop=True)
+        if "symbol" not in df.columns:
+            df["symbol"] = clean_sym if not df.empty else pd.Series(dtype=str)
         return df
 
     def append(

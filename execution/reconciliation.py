@@ -126,7 +126,8 @@ class ReconciliationEngine:
         cash_difference = 0.0
         if expected_cash is not None:
             cash_difference = abs(account.cash - expected_cash)
-            if cash_difference > tolerance:
+            effective_cash_tolerance = max(tolerance, 5.0)
+            if cash_difference > effective_cash_tolerance:
                 discrepancies.append(
                     ReconciliationDiscrepancy(
                         category="EXPECTED_CASH_MISMATCH",

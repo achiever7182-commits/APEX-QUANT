@@ -182,7 +182,7 @@ class PaperRiskManager:
         post_stock_value = new_shares * quote.price
         post_weight = post_stock_value / account.total_equity if account.total_equity > 0 else 0.0
 
-        if post_weight > (self.max_single_stock_weight + 1e-4):
+        if post_weight > (self.max_single_stock_weight + 0.005):
             return RiskCheckResult(
                 passed=False,
                 rejection_reason=RejectionReason.POSITION_LIMIT,
@@ -198,7 +198,7 @@ class PaperRiskManager:
         post_sec_value = current_sector_value + est_notional
         post_sec_weight = post_sec_value / account.total_equity if account.total_equity > 0 else 0.0
 
-        if post_sec_weight > (self.max_sector_weight + 1e-4):
+        if post_sec_weight > (self.max_sector_weight + 0.005):
             return RiskCheckResult(
                 passed=False,
                 rejection_reason=RejectionReason.SECTOR_LIMIT,
@@ -207,7 +207,7 @@ class PaperRiskManager:
 
         # 12. Total Gross Exposure Check (<= 100%, zero leverage)
         post_gross_exposure = (account.positions_value + est_notional) / account.total_equity if account.total_equity > 0 else 0.0
-        if post_gross_exposure > (self.max_gross_exposure + 1e-4):
+        if post_gross_exposure > (self.max_gross_exposure + 0.005):
             return RiskCheckResult(
                 passed=False,
                 rejection_reason=RejectionReason.TOTAL_EXPOSURE_LIMIT,

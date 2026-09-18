@@ -54,15 +54,18 @@ class PortfolioRunner:
         Returns:
             Strongly typed PortfolioBuildResult from Step 7.
         """
-        # Convert backtesting HoldingPosition instances into Step 7 PortfolioPosition instances
+        # Convert backtesting HoldingPosition or pass through Step 7 PortfolioPosition instances
         current_portfolio_positions: Dict[str, PortfolioPosition] = {}
         for sym, pos in current_holdings.items():
-            if pos.shares > 0:
+            if isinstance(pos, PortfolioPosition):
+                if pos.shares > 0:
+                    current_portfolio_positions[sym] = pos
+            elif pos.shares > 0:
                 current_portfolio_positions[sym] = PortfolioPosition(
                     symbol=sym,
                     shares=pos.shares,
-                    price=pos.current_price,
-                    value=pos.market_value,
+                    price=getattr(pos, "current_price", getattr(pos, "price", 0.0)),
+                    value=getattr(pos, "market_value", getattr(pos, "value", 0.0)),
                     weight=pos.weight,
                 )
 
