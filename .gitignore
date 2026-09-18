@@ -50,3 +50,9 @@ state/
 # Archive backups
 bot_state_archive_*.json
 trade_log_archive_*.csv
+
+# Paper trading runtime state
+data/paper/
+
+frontend/node_modules/
+frontend/dist/

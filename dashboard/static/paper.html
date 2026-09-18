@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APEX QUANT — Indian Equities Paper Trading Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0d14;
+      --bg-surface: #101522;
+      --bg-card: #151b2d;
+      --border: #202b42;
+      --border-focus: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --card-radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 24px; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+      display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 20px;
+    }
+    .brand-title h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand-title p { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+    .header-badges { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--bg-surface);
+    }
+    .badge-green { color: var(--accent-green); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+    .badge-red { color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
+    .badge-blue { color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.1); }
+
+    .btn-kill {
+      padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
+      border: 1px solid var(--accent-red); background: rgba(239, 68, 68, 0.15); color: #fca5a5;
+      transition: all 0.2s;
+    }
+    .btn-kill:hover { background: rgba(239, 68, 68, 0.3); color: #fff; }
+    .btn-kill.active { background: var(--accent-red); color: #fff; }
+
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius);
+      padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .card-title { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .card-val { font-size: 26px; font-weight: 700; }
+    .card-sub { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .positive { color: var(--accent-green); }
+    .negative { color: var(--accent-red); }
+
+    .main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .section-header { font-size: 16px; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+    th { text-align: left; padding: 10px; color: var(--text-secondary); border-bottom: 1px solid var(--border); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+    td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .risk-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .risk-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; background: var(--bg-surface); border-radius: 8px; border: 1px solid var(--border);
+    }
+    .risk-label { font-size: 13px; font-weight: 500; }
+    .risk-val { font-size: 13px; font-weight: 700; }
+
+    .disclaimer {
+      margin-top: 30px; padding: 14px 20px; background: rgba(56, 189, 248, 0.05);
+      border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; font-size: 12px; color: var(--accent-blue);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">AQ</div>
+      <div class="brand-title">
+        <h1>APEX QUANT — Paper Trading Terminal</h1>
+        <p>Indian Equities (NSE) • Point-in-Time Simulation</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <div id="mktBadge" class="badge badge-blue">MARKET STATUS: CHECKING...</div>
+      <div id="reconBadge" class="badge badge-green">RECONCILIATION: MATCH</div>
+      <button id="killBtn" class="btn-kill" onclick="toggleKillSwitch()">ENGAGE KILL SWITCH</button>
+    </div>
+  </header>
+
+  <div class="metrics-grid">
+    <div class="card">
+      <div class="card-title">Virtual Total Equity</div>
+      <div id="totalEquity" class="card-val mono">₹10,00,000.00</div>
+      <div id="equityPnl" class="card-sub mono">Baseline: ₹10,00,000.00</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Available Cash</div>
+      <div id="availCash" class="card-val mono">₹10,00,000.00</div>
+      <div id="cashFraction" class="card-sub mono">100.0% Cash</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Invested Value</div>
+      <div id="investedVal" class="card-val mono">₹0.00</div>
+      <div id="activePosCount" class="card-sub mono">0 Positions</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Daily P&L</div>
+      <div id="dailyPnl" class="card-val mono">₹0.00</div>
+      <div id="dailyPnlPct" class="card-sub mono">+0.00%</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Max Drawdown</div>
+      <div id="maxDd" class="card-val mono">0.00%</div>
+      <div class="card-sub mono" style="color: var(--text-secondary)">Limit: 10.00%</div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div>
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="section-header">
+          <span>Active Paper Positions</span>
+          <span id="posCountBadge" class="badge badge-blue mono">0 Open</span>
+        </div>
+        <table id="positionsTable">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Shares</th>
+              <th>Avg Cost</th>
+              <th>Current Price</th>
+              <th>Market Value</th>
+              <th>Unrealized P&L</th>
+            </tr>
+          </thead>
+          <tbody id="positionsBody">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 24px;">No active paper positions. Portfolio is 100% cash.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <span>Recent Execution Orders</span>
+          <span class="badge badge-blue mono">Lifecycle</span>
+        </div>
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Symbol</th>
+              <th>Side</th>
+              <th>Requested</th>
+              <th>Filled</th>
+              <th>Avg Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 20px;">No orders placed yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="section-header">Pre-Trade Risk Engine Status</div>
+        <ul class="risk-list">
+          <li class="risk-item">
+            <span class="risk-label">Max Single-Stock Limit</span>
+            <span class="risk-val mono positive">35.0% Ceiling (PASS)</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Max Sector Limit</span>
+            <span class="risk-val mono positive">55.0% Ceiling (PASS)</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Gross Leverage Constraint</span>
+            <span class="risk-val mono positive">1.00x Max (Zero Leverage)</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Liquidity Participation Cap</span>
+            <span class="risk-val mono positive">5.0% Volume (PASS)</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Daily Loss Circuit Breaker</span>
+            <span class="risk-val mono positive">-3.0% Threshold</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Drawdown Circuit Breaker</span>
+            <span class="risk-val mono positive">-10.0% Threshold</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Quote Freshness Guard</span>
+            <span class="risk-val mono positive">&lt; 300s Staleness Guard</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Persistent Kill Switch</span>
+            <span id="killSwitchStateLabel" class="risk-val mono positive">INACTIVE (NORMAL)</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="section-header">Execution Parameters</div>
+        <ul class="risk-list">
+          <li class="risk-item">
+            <span class="risk-label">Brokerage Fee Model</span>
+            <span class="risk-val mono">10.0 bps (0.10%)</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Slippage Impact Model</span>
+            <span class="risk-val mono">5.0 bps (0.05%)</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Share Granularity</span>
+            <span class="risk-val mono">Discrete Integer Shares</span>
+          </li>
+          <li class="risk-item">
+            <span class="risk-label">Shorting Policy</span>
+            <span class="risk-val mono">Long-Only (Forbidden)</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>RESEARCH PAPER TRADING NOTICE:</strong>
+    This paper trading terminal simulates Indian equity execution with realistic transaction costs, slippage, and point-in-time constraints. It operates with ₹10,00,000 virtual paper capital. No real broker is connected, no real orders are routed, and no actual financial risk is incurred. Isolated completely from the legacy Binance Testnet bot.
+  </div>
+
+  <script>
+    async function fetchPaperData() {
+      try {
+        const res = await fetch('/api/paper/summary');
+        if (!res.ok) return;
+        const data = await res.json();
+        renderSummary(data);
+      } catch (e) {
+        console.error('Error fetching paper data:', e);
+      }
+    }
+
+    function renderSummary(data) {
+      document.getElementById('totalEquity').textContent = '₹' + Number(data.total_equity || 1000000).toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('availCash').textContent = '₹' + Number(data.cash || 1000000).toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('investedVal').textContent = '₹' + Number(data.positions_value || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+      
+      const pnl = data.daily_pnl || 0;
+      const pnlEl = document.getElementById('dailyPnl');
+      pnlEl.textContent = (pnl >= 0 ? '+' : '') + '₹' + Number(pnl).toLocaleString('en-IN', {minimumFractionDigits: 2});
+      pnlEl.className = 'card-val mono ' + (pnl >= 0 ? 'positive' : 'negative');
+
+      document.getElementById('maxDd').textContent = (Number(data.max_drawdown || 0) * 100).toFixed(2) + '%';
+      
+      // Market status badge
+      const mktBadge = document.getElementById('mktBadge');
+      if (data.market_open) {
+        mktBadge.textContent = 'MARKET: OPEN (NSE)';
+        mktBadge.className = 'badge badge-green';
+      } else {
+        mktBadge.textContent = 'MARKET: CLOSED';
+        mktBadge.className = 'badge badge-red';
+      }
+
+      // Kill switch
+      const killBtn = document.getElementById('killBtn');
+      const killState = document.getElementById('killSwitchStateLabel');
+      if (data.kill_switch && data.kill_switch.is_active) {
+        killBtn.textContent = 'DISENGAGE KILL SWITCH';
+        killBtn.className = 'btn-kill active';
+        killState.textContent = 'ACTIVE (BLOCKED)';
+        killState.className = 'risk-val mono negative';
+      } else {
+        killBtn.textContent = 'ENGAGE KILL SWITCH';
+        killBtn.className = 'btn-kill';
+        killState.textContent = 'INACTIVE (NORMAL)';
+        killState.className = 'risk-val mono positive';
+      }
+
+      // Positions
+      const posBody = document.getElementById('positionsBody');
+      const positions = data.positions || [];
+      document.getElementById('posCountBadge').textContent = positions.length + ' Open';
+      document.getElementById('activePosCount').textContent = positions.length + ' Positions';
+
+      if (positions.length === 0) {
+        posBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 24px;">No active paper positions. Portfolio is 100% cash.</td></tr>';
+      } else {
+        posBody.innerHTML = positions.map(p => {
+          const unPnl = p.unrealized_pnl || 0;
+          const pnlClass = unPnl >= 0 ? 'positive' : 'negative';
+          return `
+            <tr>
+              <td class="mono" style="font-weight: 600;">${p.symbol}</td>
+              <td class="mono">${p.shares}</td>
+              <td class="mono">₹${Number(p.average_cost).toFixed(2)}</td>
+              <td class="mono">₹${Number(p.current_price).toFixed(2)}</td>
+              <td class="mono">₹${Number(p.market_value).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+              <td class="mono ${pnlClass}">${unPnl >= 0 ? '+' : ''}₹${Number(unPnl).toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Reconciliation badge
+      if (data.last_reconciliation) {
+        const rBadge = document.getElementById('reconBadge');
+        if (data.last_reconciliation.status === 'MATCH') {
+          rBadge.textContent = 'RECONCILIATION: MATCH';
+          rBadge.className = 'badge badge-green';
+        } else {
+          rBadge.textContent = 'RECONCILIATION: ' + data.last_reconciliation.status;
+          rBadge.className = 'badge badge-red';
+        }
+      }
+    }
+
+    async function toggleKillSwitch() {
+      try {
+        const res = await fetch('/api/paper/kill_switch', { method: 'POST' });
+        await res.json();
+        fetchPaperData();
+      } catch (e) {
+        console.error('Error toggling kill switch:', e);
+      }
+    }
+
+    fetchPaperData();
+    setInterval(fetchPaperData, 3000);
+  </script>
+</body>
+</html>
