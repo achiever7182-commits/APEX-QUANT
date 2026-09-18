@@ -69,6 +69,10 @@ class ParquetMarketDataStorage:
         clean_sym = symbol.upper().replace(".NS", "").replace(".BO", "").strip()
         out = df.copy()
 
+        # Ensure symbol column is present in written parquet schema
+        if "symbol" not in out.columns:
+            out["symbol"] = clean_sym
+
         # Ensure timestamp is datetime64
         if not pd.api.types.is_datetime64_any_dtype(out["timestamp"]):
             out["timestamp"] = pd.to_datetime(out["timestamp"], utc=True)
@@ -95,11 +99,12 @@ class ParquetMarketDataStorage:
 
         table = pq.read_table(target_file)
         df = table.to_pandas()
-        if not df.empty and "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"])
-            df = df.sort_values("timestamp").reset_index(drop=True)
-        if "symbol" not in df.columns:
-            df["symbol"] = clean_sym if not df.empty else pd.Series(dtype=str)
+        if not df.empty:
+            if "timestamp" in df.columns:
+                df["timestamp"] = pd.to_datetime(df["timestamp"])
+                df = df.sort_values("timestamp").reset_index(drop=True)
+            if "symbol" not in df.columns:
+                df["symbol"] = clean_sym
         return df
 
     def append(

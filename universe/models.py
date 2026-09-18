@@ -66,8 +66,46 @@ class Stock:
         """True if the stock is actively listed."""
         return self.listing_status == ListingStatus.ACTIVE
 
-    def to_instrument(self) -> Instrument:
-        """Convert to core.interfaces.instrument.Instrument."""
+    def is_tradable_on(self, as_of_date: Optional[Union[date, datetime, str]] = None) -> bool:
+        """
+        Evaluate if the equity was tradable as of a specific historical date.
+        
+        If as_of_date is None, returns current listing status (self.is_tradable).
+        If delisted with an explicit delisting_date:
+          - Returns True if as_of_date < delisting_date (was actively listed).
+          - Returns False if as_of_date >= delisting_date.
+        If suspended, returns False (current data model does not track historical suspension intervals).
+        """
+        if as_of_date is None:
+            return self.is_tradable
+
+        if isinstance(as_of_date, datetime):
+            d = as_of_date.date()
+        elif isinstance(as_of_date, str):
+            d = datetime.fromisoformat(as_of_date.split("T")[0]).date()
+        elif isinstance(as_of_date, date):
+            d = as_of_date
+        else:
+            raise TypeError(f"Unsupported date type: {type(as_of_date)}")
+
+        if self.listing_status == ListingStatus.DELISTED:
+            if self.delisting_date is not None:
+                return d < self.delisting_date
+            return False
+
+        if self.listing_status == ListingStatus.SUSPENDED:
+            return False
+
+        return self.listing_status == ListingStatus.ACTIVE
+
+    def to_instrument(self, as_of_date: Optional[Union[date, datetime, str]] = None) -> Instrument:
+        """
+        Convert to core.interfaces.instrument.Instrument.
+        
+        If as_of_date is provided, instrument.is_tradable reflects the equity's listing status
+        on that historical date rather than its present-day status.
+        """
+        tradable = self.is_tradable_on(as_of_date) if as_of_date is not None else self.is_tradable
         return Instrument(
             symbol=self.symbol,
             asset_class=AssetClass.EQUITY,
@@ -76,7 +114,7 @@ class Stock:
             lot_size=1.0,
             tick_size=0.05,
             isin=self.isin,
-            is_tradable=self.is_tradable,
+            is_tradable=tradable,
         )
 
 

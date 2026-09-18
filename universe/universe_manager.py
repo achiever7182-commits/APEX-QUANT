@@ -58,9 +58,13 @@ class UniverseManager(IUniverseManager):
         return self.nifty500.point_in_time_status
 
     def get_all_symbols(self) -> List[str]:
-        """Return all distinct symbols registered in the universe repository."""
-        snap = self.nifty500.get_point_in_time_constituents(date.today())
-        return snap.symbols
+        """
+        Return all distinct symbols registered in the universe repository across all time.
+        
+        Guarantees that historical constituents (e.g. HDFCLTD, DHFL, YESBANK)
+        are included, preventing survivorship bias during symbol discovery.
+        """
+        return self.nifty500.get_all_symbols()
 
     def get_universe(self, as_of_date: Union[date, datetime, str]) -> UniverseSnapshot:
         """
@@ -133,7 +137,7 @@ class UniverseManager(IUniverseManager):
         pipeline = StockFilterPipeline(pipeline_filters)
         target_date = as_of_date if as_of_date is not None else date.today()
         eligible_stocks, _ = self.get_eligible_universe(target_date, pipeline=pipeline)
-        return [s.to_instrument() for s in eligible_stocks]
+        return [s.to_instrument(as_of_date=target_date) for s in eligible_stocks]
 
     def update_constituents(self) -> None:
         """Refresh universe data (re-initializes constituent repository)."""

@@ -6,10 +6,11 @@ Handles serializing and retrieving symbol corporate actions from local disk/cach
 
 from __future__ import annotations
 
+from datetime import date, datetime
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from data.corporate_actions.models import CorporateAction, CorporateActionType
 
@@ -46,8 +47,19 @@ class CorporateActionsLoader:
             json.dump(data, f, indent=2)
         return target
 
-    def load_actions(self, symbol: str) -> List[CorporateAction]:
-        """Load cached corporate actions for a symbol."""
+    def load_actions(
+        self,
+        symbol: str,
+        as_of_date: Optional[Union[date, datetime, str]] = None,
+    ) -> List[CorporateAction]:
+        """
+        Load cached corporate actions for a symbol.
+        
+        Args:
+            symbol: Ticker symbol
+            as_of_date: If provided, returns only actions whose ex_date <= as_of_date.
+                        If None, preserves default behavior of returning all cached actions.
+        """
         target = self._get_path(symbol)
         if not target.exists():
             return []
@@ -68,4 +80,8 @@ class CorporateActionsLoader:
                     details=item.get("details", ""),
                 )
             )
+
+        if as_of_date is not None:
+            actions = [a for a in actions if a.is_effective_on(as_of_date)]
+
         return actions

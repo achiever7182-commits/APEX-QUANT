@@ -24,6 +24,16 @@ logger = logging.getLogger(__name__)
 class IMarketDataProvider(ABC):
     """Abstract interface for historical market data providers."""
 
+    @property
+    def is_split_adjusted(self) -> bool:
+        """
+        Indicates whether daily bars returned by get_daily_bars are already split/bonus adjusted.
+        
+        Default is False (bars contain raw unadjusted trading prices).
+        Providers like Yahoo Finance that return split-adjusted quotes should return True.
+        """
+        return False
+
     @abstractmethod
     def get_daily_bars(
         self,
@@ -78,6 +88,11 @@ class YahooFinanceProvider(IMarketDataProvider):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "application/json, text/plain, */*",
     }
+
+    @property
+    def is_split_adjusted(self) -> bool:
+        """Yahoo Finance v8 chart API returns quotes that are already split/bonus-adjusted."""
+        return True
 
     def __init__(self, session: Optional[requests.Session] = None, timeout: int = 15) -> None:
         self.session = session or requests.Session()
@@ -289,6 +304,11 @@ class MockMarketDataProvider(IMarketDataProvider):
     
     Generates synthetic daily bars with known corporate action splits for test validation.
     """
+
+    @property
+    def is_split_adjusted(self) -> bool:
+        """Mock provider produces raw unadjusted price series."""
+        return False
 
     def __init__(self, seed: int = 42) -> None:
         self.seed = seed

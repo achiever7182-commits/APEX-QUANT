@@ -73,3 +73,23 @@ class CorporateAction:
             return (float(self.ratio_numerator) + float(self.ratio_denominator)) / float(self.ratio_denominator)
         
         return 1.0
+
+    def is_effective_on(self, as_of_date: Union[date, datetime, str]) -> bool:
+        """
+        Check if this corporate action took effect on or before as_of_date.
+        
+        Args:
+            as_of_date: Cutoff date (date, datetime, or ISO string)
+            
+        Returns:
+            True if ex_date <= as_of_date, False otherwise.
+        """
+        if isinstance(as_of_date, datetime):
+            cutoff = as_of_date.date()
+        elif isinstance(as_of_date, date):
+            cutoff = as_of_date
+        elif isinstance(as_of_date, str):
+            cutoff = datetime.fromisoformat(as_of_date.split("T")[0]).date()
+        else:
+            raise TypeError(f"Unsupported date type: {type(as_of_date)}")
+        return self.ex_date_obj <= cutoff

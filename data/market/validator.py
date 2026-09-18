@@ -141,11 +141,28 @@ class DataQualityValidator:
         if nan_rows > 0:
             anomalies.append(f"Found {nan_rows} rows with NaN in OHLCV columns.")
 
+        # 4b. NaN / Null values in adjusted columns (if present)
+        adj_cols = [c for c in ["adjusted_open", "adjusted_high", "adjusted_low", "adjusted_close", "adjusted_volume"] if c in df.columns]
+        if adj_cols:
+            adj_nan_rows = int(df[adj_cols].isna().any(axis=1).sum())
+            if adj_nan_rows > 0:
+                anomalies.append(f"Found {adj_nan_rows} rows with NaN in adjusted columns.")
+                nan_rows += adj_nan_rows
+
         # 5. Negative Prices
         neg_price_mask = (df["open"] < 0) | (df["high"] < 0) | (df["low"] < 0) | (df["close"] < 0)
         neg_prices = int(neg_price_mask.sum())
         if neg_prices > 0:
             anomalies.append(f"Found {neg_prices} rows with negative prices.")
+
+        # 5b. Negative Adjusted Prices (if present)
+        adj_price_cols = [c for c in ["adjusted_open", "adjusted_high", "adjusted_low", "adjusted_close"] if c in df.columns]
+        if adj_price_cols:
+            adj_neg_price_mask = (df[adj_price_cols] < 0).any(axis=1)
+            adj_neg_prices = int(adj_neg_price_mask.sum())
+            if adj_neg_prices > 0:
+                anomalies.append(f"Found {adj_neg_prices} rows with negative adjusted prices.")
+                neg_prices += adj_neg_prices
 
         # 6. Negative Volume
         neg_vol_mask = df["volume"] < 0
@@ -153,11 +170,27 @@ class DataQualityValidator:
         if neg_volume > 0:
             anomalies.append(f"Found {neg_volume} rows with negative volume.")
 
+        # 6b. Negative Adjusted Volume (if present)
+        if "adjusted_volume" in df.columns:
+            adj_neg_vol_mask = df["adjusted_volume"] < 0
+            adj_neg_vol = int(adj_neg_vol_mask.sum())
+            if adj_neg_vol > 0:
+                anomalies.append(f"Found {adj_neg_vol} rows with negative adjusted volume.")
+                neg_volume += adj_neg_vol
+
         # 7. High < Low Violations
         hl_viol_mask = df["high"] < df["low"]
         hl_violations = int(hl_viol_mask.sum())
         if hl_violations > 0:
             anomalies.append(f"Found {hl_violations} rows where high < low.")
+
+        # 7b. Adjusted High < Low Violations (if present)
+        if "adjusted_high" in df.columns and "adjusted_low" in df.columns:
+            adj_hl_viol_mask = df["adjusted_high"] < df["adjusted_low"]
+            adj_hl_violations = int(adj_hl_viol_mask.sum())
+            if adj_hl_violations > 0:
+                anomalies.append(f"Found {adj_hl_violations} rows where adjusted_high < adjusted_low.")
+                hl_violations += adj_hl_violations
 
         # 8. Open/Close outside High/Low range
         tol = 1e-4
@@ -171,6 +204,24 @@ class DataQualityValidator:
         if oc_violations > 0:
             anomalies.append(f"Found {oc_violations} rows where open/close violated [low, high] bounds.")
 
+        # 8b. Adjusted Open/Close outside High/Low range (if present)
+        if "adjusted_high" in df.columns and "adjusted_low" in df.columns:
+            adj_oc_conditions = []
+            if "adjusted_open" in df.columns:
+                adj_oc_conditions.append(df["adjusted_open"] > df["adjusted_high"] + tol)
+                adj_oc_conditions.append(df["adjusted_open"] < df["adjusted_low"] - tol)
+            if "adjusted_close" in df.columns:
+                adj_oc_conditions.append(df["adjusted_close"] > df["adjusted_high"] + tol)
+                adj_oc_conditions.append(df["adjusted_close"] < df["adjusted_low"] - tol)
+            if adj_oc_conditions:
+                adj_oc_mask = adj_oc_conditions[0]
+                for cond in adj_oc_conditions[1:]:
+                    adj_oc_mask = adj_oc_mask | cond
+                adj_oc_violations = int(adj_oc_mask.sum())
+                if adj_oc_violations > 0:
+                    anomalies.append(f"Found {adj_oc_violations} rows where adjusted open/close violated [adjusted_low, adjusted_high] bounds.")
+                    oc_violations += adj_oc_violations
+
         # 9. Abnormal Price Jumps (>20% day-over-day)
         # Use close-to-close returns
         close_pct_change = df["close"].pct_change().abs() * 100.0
@@ -179,9 +230,18 @@ class DataQualityValidator:
         if abnormal_jumps > 0:
             anomalies.append(f"Found {abnormal_jumps} daily returns exceeding {jump_threshold_pct}% threshold.")
 
+        # 9b. Abnormal Adjusted Price Jumps (if present)
+        if "adjusted_close" in df.columns:
+            adj_close_pct_change = df["adjusted_close"].pct_change().abs() * 100.0
+            adj_jump_mask = adj_close_pct_change > jump_threshold_pct
+            adj_abnormal_jumps = int(adj_jump_mask.sum())
+            if adj_abnormal_jumps > 0:
+                anomalies.append(f"Found {adj_abnormal_jumps} daily adjusted returns exceeding {jump_threshold_pct}% threshold.")
+                abnormal_jumps += adj_abnormal_jumps
+
         # 10. Overall Status Determination
         # FAIL if severe mathematical/negative errors exist
-        if neg_prices > 0 or hl_violations > 0 or nan_rows > 0:
+        if neg_prices > 0 or hl_violations > 0 or nan_rows > 0 or neg_volume > 0:
             status = "FAIL"
         elif duplicates > 0 or oc_violations > 0 or abnormal_jumps > 0:
             status = "WARNING"
