@@ -145,7 +145,11 @@ class PortfolioBuilder:
                 liquidity=turnover,
                 current_price=price,
                 is_eligible=item.is_eligible,
-                rejection_reason=CandidateRejectionReason(item.rejection_reason.value) if item.rejection_reason else None,
+                rejection_reason=(
+                    CandidateRejectionReason[item.rejection_reason.value]
+                    if item.rejection_reason and item.rejection_reason.value in CandidateRejectionReason.__members__
+                    else (CandidateRejectionReason(item.rejection_reason.value) if item.rejection_reason and item.rejection_reason.value in [e.value for e in CandidateRejectionReason] else (CandidateRejectionReason.OTHER if item.rejection_reason else None))
+                ),
             )
 
             # Validate against portfolio-level candidate constraints

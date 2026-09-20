@@ -11,7 +11,7 @@ event logging, and in-flight order registry.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 from execution.broker import Broker
 from execution.data_adapter import ValidatedQuote
 from execution.exceptions import (
@@ -26,7 +26,9 @@ from execution.models import (
     PaperOrder,
     RejectionReason,
 )
-from risk.paper_risk_manager import PaperRiskManager
+
+if TYPE_CHECKING:
+    from risk.paper_risk_manager import PaperRiskManager
 
 
 

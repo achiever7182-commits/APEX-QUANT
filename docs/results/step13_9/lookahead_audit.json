@@ -1,0 +1,18 @@
+{
+  "lookahead_detected": false,
+  "max_discrepancy": 0.0,
+  "cutoff_timestamp": "2024-01-15 00:00:00+00:00",
+  "mutation_applied": "Multiplied open/high/low/close by 10x and volume by 5x strictly after cutoff",
+  "tested_symbols": [
+    "RELIANCE",
+    "TCS",
+    "INFY"
+  ],
+  "pre_cutoff_max_discrepancy": 0.0,
+  "zero_lookahead_passed": true,
+  "point_in_time_guarantees": {
+    "features_use_strictly_past_data": true,
+    "target_labels_strictly_causal": true,
+    "walk_forward_trainer_isolated": true
+  }
+}

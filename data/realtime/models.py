@@ -56,7 +56,7 @@ class NormalizedSymbol:
             clean_exchange = parts[0]
             clean_ticker = parts[1]
 
-        if not clean_ticker or not clean_ticker.isalnum():
+        if not clean_ticker or not clean_ticker.replace("-", "").replace("&", "").isalnum():
             raise ValueError(f"Invalid ticker: '{self.ticker}'. Must be non-empty alphanumeric.")
         if clean_exchange not in ("NSE", "BSE"):
             raise ValueError(f"Invalid exchange: '{self.exchange}'. Must be 'NSE' or 'BSE'.")

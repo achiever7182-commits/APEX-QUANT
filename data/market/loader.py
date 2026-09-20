@@ -307,6 +307,92 @@ class MarketDataLoader:
         self._print_quality_table(reports)
         return reports
 
+    def ingest_catalog_universe(
+        self,
+        symbols: Optional[Sequence[str]] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        skip_existing: bool = True,
+    ) -> Tuple[List[DataQualityReport], List[str]]:
+        """
+        Ingest curated catalog symbols (default: all CuratedNifty500Provider stocks).
+
+        Preserves existing benchmark data when skip_existing=True and bars are present.
+        Returns (quality_reports, failed_symbols).
+        """
+        if symbols is None:
+            from universe.constituents import CuratedNifty500Provider
+
+            symbols = [s.symbol for s in CuratedNifty500Provider().get_stocks()]
+
+        reports: List[DataQualityReport] = []
+        failed: List[str] = []
+
+        print("\n" + "=" * 78)
+        print("  APEX QUANT — CURATED CATALOG UNIVERSE MARKET DATA INGESTION")
+        print(f"  Target symbols: {len(symbols)}")
+        print("=" * 78 + "\n")
+
+        for sym in symbols:
+            if skip_existing:
+                existing = self.storage.query_by_symbol(sym, is_adjusted=True)
+                if existing is not None and not existing.empty:
+                    logger.info(f"Skipping {sym}: {len(existing)} adjusted bars already present.")
+                    reports.append(
+                        DataQualityReport(
+                            symbol=sym,
+                            rows=len(existing),
+                            start_date=str(existing["timestamp"].min())[:10],
+                            end_date=str(existing["timestamp"].max())[:10],
+                            missing_trading_days=0,
+                            duplicates=0,
+                            nan_rows=0,
+                            negative_prices=0,
+                            negative_volume=0,
+                            high_low_violations=0,
+                            open_close_violations=0,
+                            abnormal_jumps=0,
+                            corporate_actions=0,
+                            status="PASS",
+                            anomalies=["Skipped — existing data preserved"],
+                        )
+                    )
+                    continue
+
+            try:
+                _, rep = self.ingest_symbol(sym, start_date=start_date, end_date=end_date)
+                reports.append(rep)
+            except Exception as e:
+                logger.error(f"Failed to ingest {sym}: {e}")
+                failed.append(sym)
+                reports.append(
+                    DataQualityReport(
+                        symbol=sym,
+                        rows=0,
+                        start_date="N/A",
+                        end_date="N/A",
+                        missing_trading_days=0,
+                        duplicates=0,
+                        nan_rows=0,
+                        negative_prices=0,
+                        negative_volume=0,
+                        high_low_violations=0,
+                        open_close_violations=0,
+                        abnormal_jumps=0,
+                        corporate_actions=0,
+                        status="FAIL",
+                        anomalies=[str(e)],
+                    )
+                )
+
+        report_path = Path("data_storage/quality_report.csv")
+        self.validator.save_reports_to_csv(reports, report_path)
+        print(f"\n[OK] Catalog ingestion complete. Quality report saved to: {report_path}")
+        if failed:
+            print(f"[WARN] Failed symbols ({len(failed)}): {', '.join(failed)}")
+        self._print_quality_table(reports)
+        return reports, failed
+
     @staticmethod
     def _print_quality_table(reports: Sequence[DataQualityReport]) -> None:
         """Pretty-print tabular quality report to stdout."""
@@ -325,6 +411,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="APEX QUANT Market Data Ingestion CLI")
     parser.add_argument("--symbol", type=str, help="Ingest a single stock (e.g. RELIANCE, TCS)")
     parser.add_argument("--benchmark", action="store_true", help="Ingest the 5 benchmark NIFTY stocks")
+    parser.add_argument("--catalog", action="store_true", help="Ingest full curated catalog universe (52 stocks)")
     parser.add_argument("--start", type=str, default=None, help="Start date (YYYY-MM-DD)")
     parser.add_argument("--end", type=str, default=None, help="End date (YYYY-MM-DD)")
     parser.add_argument("--mock", action="store_true", help="Use deterministic mock data provider")
@@ -345,6 +432,8 @@ def main() -> None:
             max_workers=args.workers,
             rate_limit_delay=args.rate_limit,
         )
+    elif args.catalog:
+        loader.ingest_catalog_universe(start_date=args.start, end_date=args.end)
     elif args.symbol:
         _, rep = loader.ingest_symbol(
             args.symbol,

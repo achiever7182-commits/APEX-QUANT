@@ -53,7 +53,9 @@ from execution.models import (
 )
 from execution.order_manager import OrderManager
 from execution.reconciliation import ReconciliationEngine
+import tempfile
 from execution.data_adapter import ValidatedQuote
+from risk.kill_switch import PersistentKillSwitch
 from risk.paper_risk_manager import PaperRiskManager
 
 
@@ -272,11 +274,17 @@ class TestFailClosedOrderManager(unittest.TestCase):
             data_age_seconds=1.0,
             is_valid=True,
         )
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.ks = PersistentKillSwitch(persistence_path=os.path.join(self.temp_dir.name, "ks.json"))
+        self.risk = PaperRiskManager(kill_switch=self.ks)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
 
     def test_timeout_marks_submitted_uncertain_no_retry(self):
         broker = self.TimeoutBroker()
         broker.update_market_price("ICICIBANK", 1100.0, volume=1_000_000)
-        risk = PaperRiskManager()
+        risk = self.risk
         om = OrderManager(broker=broker, risk_manager=risk)
 
         order = PaperOrder(
@@ -296,7 +304,7 @@ class TestFailClosedOrderManager(unittest.TestCase):
     def test_broker_rejection_marks_rejected(self):
         broker = self.RejectBroker()
         broker.update_market_price("ICICIBANK", 1100.0, volume=1_000_000)
-        risk = PaperRiskManager()
+        risk = self.risk
         om = OrderManager(broker=broker, risk_manager=risk)
 
         order = PaperOrder(
@@ -320,7 +328,7 @@ class TestFailClosedOrderManager(unittest.TestCase):
         """
         broker = self.TimeoutBroker()
         broker.update_market_price("ICICIBANK", 1100.0, volume=1_000_000)
-        risk = PaperRiskManager()
+        risk = self.risk
         om = OrderManager(broker=broker, risk_manager=risk)
 
         order = PaperOrder(

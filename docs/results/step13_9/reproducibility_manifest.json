@@ -1,0 +1,39 @@
+{
+  "step": "13.9",
+  "project": "APEX-QUANT",
+  "timestamp": "2026-09-20T12:00:00Z",
+  "random_seed": 42,
+  "dual_run_comparison": {
+    "run_1_return_pct": 21.0571,
+    "run_2_return_pct": 21.0571,
+    "return_difference": 0.0,
+    "cost_difference_inr": 0.0,
+    "trade_count_difference": 0,
+    "deterministic_identical": true
+  },
+  "variant_e_parameters": {
+    "strategy": "Variant E",
+    "optimizer": "TurnoverPenalizedOptimizer",
+    "gamma_turnover": 1.0,
+    "turnover_penalty_gamma": 1.0,
+    "deadband_threshold": 0.025,
+    "rebalance_cadence": "monthly",
+    "max_positions": 15,
+    "min_positions": 5,
+    "max_single_stock_weight": 0.15,
+    "max_sector_weight": 0.35,
+    "gross_exposure_limit": 0.95,
+    "cash_buffer_minimum": 0.05
+  },
+  "universe_availability": {
+    "total_curated_catalog": 52,
+    "available_count": 48,
+    "unavailable_count": 4,
+    "synthetic_bars": 0
+  },
+  "live_trading_safety": {
+    "live_trading_disabled": true,
+    "broker_network_calls_blocked": true,
+    "paper_trading_isolated": true
+  }
+}
