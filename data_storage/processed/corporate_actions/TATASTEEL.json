@@ -1,0 +1,56 @@
+[
+  {
+    "symbol": "TATASTEEL",
+    "ex_date": "2022-06-15",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.1,
+    "details": "Dividend: \u20b95.1"
+  },
+  {
+    "symbol": "TATASTEEL",
+    "ex_date": "2022-07-28",
+    "action_type": "SPLIT",
+    "ratio_numerator": 10.0,
+    "ratio_denominator": 1.0,
+    "value": 0.0,
+    "details": "Split ratio: 10:1"
+  },
+  {
+    "symbol": "TATASTEEL",
+    "ex_date": "2023-06-22",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.6,
+    "details": "Dividend: \u20b93.6"
+  },
+  {
+    "symbol": "TATASTEEL",
+    "ex_date": "2024-06-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.6,
+    "details": "Dividend: \u20b93.6"
+  },
+  {
+    "symbol": "TATASTEEL",
+    "ex_date": "2025-06-06",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.6,
+    "details": "Dividend: \u20b93.6"
+  },
+  {
+    "symbol": "TATASTEEL",
+    "ex_date": "2026-06-12",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.0,
+    "details": "Dividend: \u20b94.0"
+  }
+]

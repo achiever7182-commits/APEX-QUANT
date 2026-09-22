@@ -1,0 +1,119 @@
+[
+  {
+    "symbol": "HAL",
+    "ex_date": "2021-11-23",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.0,
+    "details": "Dividend: \u20b97.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2022-02-17",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 13.0,
+    "details": "Dividend: \u20b913.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2022-08-19",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.0,
+    "details": "Dividend: \u20b95.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2022-11-18",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 10.0,
+    "details": "Dividend: \u20b910.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2023-03-20",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 10.0,
+    "details": "Dividend: \u20b910.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2023-08-24",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.5,
+    "details": "Dividend: \u20b97.5"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2023-09-28",
+    "action_type": "SPLIT",
+    "ratio_numerator": 2.0,
+    "ratio_denominator": 1.0,
+    "value": 0.0,
+    "details": "Split ratio: 2:1"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2024-02-20",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 22.0,
+    "details": "Dividend: \u20b922.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2024-08-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 13.0,
+    "details": "Dividend: \u20b913.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2025-02-18",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 25.0,
+    "details": "Dividend: \u20b925.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2025-08-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 15.0,
+    "details": "Dividend: \u20b915.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2026-02-18",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 35.0,
+    "details": "Dividend: \u20b935.0"
+  },
+  {
+    "symbol": "HAL",
+    "ex_date": "2026-08-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 10.0,
+    "details": "Dividend: \u20b910.0"
+  }
+]

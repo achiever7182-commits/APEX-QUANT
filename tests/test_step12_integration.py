@@ -542,31 +542,34 @@ class TestStep12PaperIntegration(unittest.TestCase):
             force_market_open=True,
         )
 
+        os.environ["DASHBOARD_API_TOKEN"] = "TEST_TOKEN"
+        headers = {"Authorization": "Bearer TEST_TOKEN"}
+
         # GET /api/paper/cycle
-        resp = client.get("/api/paper/cycle")
+        resp = client.get("/api/paper/cycle", headers=headers)
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
         self.assertIn("cycle_id", data)
         self.assertIn("state", data)
 
         # GET /api/paper/signals
-        resp_sig = client.get("/api/paper/signals")
+        resp_sig = client.get("/api/paper/signals", headers=headers)
         self.assertEqual(resp_sig.status_code, 200)
         data_sig = resp_sig.get_json()
         self.assertIn("signals", data_sig)
 
         # GET /api/paper/portfolio
-        resp_port = client.get("/api/paper/portfolio")
+        resp_port = client.get("/api/paper/portfolio", headers=headers)
         self.assertEqual(resp_port.status_code, 200)
         data_port = resp_port.get_json()
         self.assertIn("equity", data_port)
 
         # GET /api/paper/reconciliation
-        resp_rec = client.get("/api/paper/reconciliation")
+        resp_rec = client.get("/api/paper/reconciliation", headers=headers)
         self.assertEqual(resp_rec.status_code, 200)
 
         # GET /api/paper/health
-        resp_hlth = client.get("/api/paper/health")
+        resp_hlth = client.get("/api/paper/health", headers=headers)
         self.assertEqual(resp_hlth.status_code, 200)
         self.assertEqual(resp_hlth.get_json()["mode"], "PAPER_TRADING")
 

@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "ADANIENT",
+    "ex_date": "2022-07-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.969485,
+    "details": "Dividend: \u20b90.969485"
+  },
+  {
+    "symbol": "ADANIENT",
+    "ex_date": "2023-07-07",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.163382,
+    "details": "Dividend: \u20b91.163382"
+  },
+  {
+    "symbol": "ADANIENT",
+    "ex_date": "2024-06-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.260331,
+    "details": "Dividend: \u20b91.260331"
+  },
+  {
+    "symbol": "ADANIENT",
+    "ex_date": "2025-06-13",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.260331,
+    "details": "Dividend: \u20b91.260331"
+  },
+  {
+    "symbol": "ADANIENT",
+    "ex_date": "2026-06-12",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.3,
+    "details": "Dividend: \u20b91.3"
+  }
+]

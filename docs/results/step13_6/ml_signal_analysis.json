@@ -1,0 +1,15 @@
+{
+  "mean_training_ic": 0.3276,
+  "mean_cross_sectional_test_ic": 0.029,
+  "ic_information_ratio": 0.043,
+  "ic_bull_regime": 0.0,
+  "ic_bear_regime": 0.175,
+  "ic_sideways_regime": -0.0357,
+  "stock_mae": {
+    "RELIANCE": 0.0212,
+    "TCS": 0.0292,
+    "INFY": 0.0211,
+    "HDFCBANK": 0.0235,
+    "ICICIBANK": 0.0168
+  }
+}

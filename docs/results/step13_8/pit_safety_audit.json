@@ -1,0 +1,19 @@
+{
+  "evaluated_symbols": 48,
+  "total_bars_verified": 59087,
+  "total_negative_prices": 0,
+  "total_ohlc_violations": 0,
+  "total_duplicates": 0,
+  "total_nan_rows": 0,
+  "status_summary": {
+    "PASS": 45,
+    "WARNING": 3
+  },
+  "pit_safety_guarantees": {
+    "no_future_leakage_in_features": true,
+    "target_horizon_strict_cutoff": "t + horizon <= T",
+    "cross_sectional_normalization_as_of_t_only": true,
+    "corporate_actions_applied_backward_only": true,
+    "survivorship_bias_acknowledged": "Evaluated on curated survivor sample; 4 delisted/untraded stocks documented"
+  }
+}

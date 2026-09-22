@@ -1,0 +1,22 @@
+variant,universe,period,start_date,end_date,return_pct,cagr_trading_pct,cagr_calendar_pct,sharpe_rf6_5,sortino,max_dd_pct,turnover,total_costs,executed_fills,closed_trades,win_rate_pct,profit_factor
+Variant 1: Constrained Weekly (Baseline),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,14.36,16.38,15.86,0.907,1.372,6.77,13.92,44959.99,185,138,59.4,1.721
+Variant 2: Constrained Bi-Weekly (10d),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,4.36,4.94,4.8,-0.101,-0.143,10.51,9.1,28144.72,91,60,60.0,1.31
+Variant 3: Constrained Monthly (1ME),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,13.58,15.48,14.99,0.777,1.241,5.89,4.28,13480.05,43,24,79.2,3.489
+Variant 4: Turnover-Constrained (20% cap),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,9.7,11.02,10.68,0.56,0.874,6.07,6.27,23870.81,108,85,49.4,2.15
+Variant 5: Equal Weight Weekly,5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,14.8,16.88,16.34,0.841,1.269,8.57,0.88,2755.82,213,99,78.8,11.693
+Variant 6: Equal Weight Monthly,5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,14.79,16.87,16.34,0.84,1.268,8.66,0.61,1873.71,52,21,85.7,13.675
+Variant 7: Score-Weighted Weekly,5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,14.0,15.96,15.46,0.76,1.127,9.28,5.35,17117.43,235,213,57.3,1.999
+Variant 1: Constrained Weekly (Baseline),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,-10.92,-4.79,-4.76,-0.318,-0.733,32.62,37.47,114212.95,477,366,38.0,0.511
+Variant 2: Constrained Bi-Weekly (10d),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,-19.26,-8.69,-8.63,-0.848,-1.298,27.35,20.63,60446.38,260,196,38.8,0.503
+Variant 3: Constrained Monthly (1ME),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,26.07,10.35,10.27,0.244,0.652,24.91,11.96,46524.47,125,85,40.0,0.492
+Variant 4: Turnover-Constrained (20% cap),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,5.31,2.22,2.21,-0.059,-0.154,26.93,20.31,80780.7,425,341,42.2,0.539
+Variant 5: Equal Weight Weekly,5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,27.52,10.88,10.8,0.277,0.589,22.24,1.91,7411.24,579,402,59.7,0.959
+Variant 6: Equal Weight Monthly,5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,26.72,10.59,10.5,0.266,0.558,21.96,1.19,4289.47,135,78,62.8,1.559
+Variant 7: Score-Weighted Weekly,5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,15.31,6.24,6.19,0.095,0.215,25.86,15.94,58567.79,633,594,42.9,0.555
+Variant 1: Constrained Weekly (Baseline),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,-6.73,-1.89,-1.86,-0.279,-0.593,32.63,53.84,169059.55,733,565,43.7,0.634
+Variant 2: Constrained Bi-Weekly (10d),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,8.52,2.27,2.23,-0.084,-0.193,30.45,34.85,123213.93,390,282,50.3,0.653
+Variant 3: Constrained Monthly (1ME),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,36.62,8.94,8.8,0.194,0.481,24.94,17.11,66175.81,179,123,48.8,0.616
+Variant 4: Turnover-Constrained (20% cap),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,-3.37,-0.94,-0.92,-0.284,-0.653,28.96,28.5,111474.25,573,445,42.5,0.564
+Variant 5: Equal Weight Weekly,5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,44.62,10.66,10.48,0.28,0.553,22.27,2.48,9994.08,874,681,64.9,1.663
+Variant 6: Equal Weight Monthly,5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,43.79,10.48,10.31,0.273,0.533,22.0,1.43,5423.17,214,131,68.7,4.358
+Variant 7: Score-Weighted Weekly,5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,31.27,7.75,7.63,0.144,0.301,25.86,22.46,86715.64,972,927,49.7,0.754

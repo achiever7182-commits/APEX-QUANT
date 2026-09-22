@@ -1,0 +1,62 @@
+{
+  "backtest": {
+    "start_date": "2023-06-01",
+    "end_date": "2024-04-30",
+    "starting_capital": 1000000.0,
+    "ending_capital": 1143618.823838497,
+    "total_return_pct": 14.36,
+    "trading_cagr_pct": 16.38,
+    "calendar_cagr_pct": 15.86,
+    "annualized_volatility_pct": 10.21,
+    "sharpe_rf6_5": 0.907,
+    "sortino": 1.372,
+    "max_drawdown_pct": 6.77,
+    "max_dd_duration_days": 68,
+    "total_turnover": 13.92,
+    "total_executed_fills": 185,
+    "long_fills": 96,
+    "sell_fills": 92,
+    "total_transaction_costs": 29973.36,
+    "total_slippage": 14986.63,
+    "total_friction": 44959.99,
+    "daily_win_rate_pct": 53.15,
+    "daily_profit_factor": 1.292,
+    "trade_stats": {
+      "total_closed_trades": 138,
+      "winning_trades": 82,
+      "losing_trades": 56,
+      "win_rate": 0.5942,
+      "gross_profit": 274571.13,
+      "gross_loss": 159587.37,
+      "profit_factor": 1.721,
+      "average_trade": 833.22,
+      "average_win": 3348.43,
+      "average_loss": -2849.77,
+      "median_trade": 82.11,
+      "largest_winning_trade": 28917.16,
+      "largest_losing_trade": -24750.34,
+      "expectancy": 833.22,
+      "max_consecutive_wins": 18,
+      "max_consecutive_losses": 6,
+      "average_holding_period_days": 19.7
+    }
+  },
+  "lookahead_audit": {
+    "training_cutoff_verified": true,
+    "future_mutation_test": "PASS",
+    "lookahead_bias_detected": false
+  },
+  "paper_trading": {
+    "status": "INSUFFICIENT PAPER HISTORY",
+    "session_count": 2,
+    "fill_count": 6,
+    "starting_equity": 1000000.0,
+    "ending_equity": 1001120.00060315,
+    "realized_pnl": 28.677850770000425,
+    "unrealized_pnl": 2039.771980000136,
+    "total_fees": 952.8485668499999,
+    "total_slippage": 476.1883899999418,
+    "max_drawdown": 0.000948449227620149,
+    "win_rate": "N/A \u2014 insufficient data"
+  }
+}

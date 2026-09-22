@@ -1,0 +1,6 @@
+regime,trading_days,pct_of_sample,variant_e_total_return_pct,benchmark_total_return_pct,variant_e_annualized_return_pct,benchmark_annualized_return_pct,variant_e_annualized_vol_pct,variant_e_sharpe,variant_e_daily_win_rate_pct,excess_annualized_return_pct
+"Bull Market (Trend > 0, Return > 0)",699,76.1,108.75,294.06,27.34,50.84,12.76,1.633,56.4,-23.5
+Bear / Corrective Market (Trend < 0),76,8.3,-5.09,-19.0,-16.8,-68.41,10.04,-2.321,43.4,51.61
+Sideways / Range-Bound,143,15.6,-14.11,-15.49,-26.02,-28.49,12.32,-2.639,39.9,2.47
+High-Volatility Regime (> 75th percentile),225,24.5,35.46,112.9,35.23,88.64,15.62,1.839,55.6,-53.41
+Low-Volatility Regime (< 25th percentile),225,24.5,6.7,25.3,7.52,25.57,7.03,0.144,52.9,-18.05

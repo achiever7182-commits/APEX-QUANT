@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "LT",
+    "ex_date": "2022-07-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 22.0,
+    "details": "Dividend: \u20b922.0"
+  },
+  {
+    "symbol": "LT",
+    "ex_date": "2023-08-02",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 30.0,
+    "details": "Dividend: \u20b930.0"
+  },
+  {
+    "symbol": "LT",
+    "ex_date": "2024-06-20",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 28.0,
+    "details": "Dividend: \u20b928.0"
+  },
+  {
+    "symbol": "LT",
+    "ex_date": "2025-06-03",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 34.0,
+    "details": "Dividend: \u20b934.0"
+  },
+  {
+    "symbol": "LT",
+    "ex_date": "2026-05-22",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 38.0,
+    "details": "Dividend: \u20b938.0"
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "multi_year_baseline_turnover": 52.99,
+  "multi_year_equal_weight_weekly_turnover": 2.48,
+  "multi_year_equal_weight_monthly_turnover": 1.43,
+  "multi_year_monthly_constrained_turnover": 16.66,
+  "multi_year_turnover_penalized_turnover": 2.32,
+  "multi_year_deadband_turnover": 52.37,
+  "attribution_breakdown": {
+    "passive_price_drift_turnover": 2.48,
+    "passive_price_drift_pct": 4.68,
+    "active_optimizer_churn_turnover": 50.51,
+    "active_optimizer_churn_pct": 95.32,
+    "weekly_vs_monthly_cadence_drag": 36.33,
+    "weekly_vs_monthly_cadence_drag_pct": 68.56,
+    "turnover_penalty_savings_turnover": 50.67,
+    "turnover_penalty_reduction_pct": 95.62,
+    "deadband_savings_turnover": 0.62,
+    "deadband_reduction_pct": 1.17
+  },
+  "root_causes": [
+    "1. Unpenalized SLSQP Objective: In 5-stock cross-section, optimizer swings weights from 5% to 40% based on tiny expected return diffs.",
+    "2. Lack of Rebalance Deadband: Micro-adjustments (<2.5%) create 185 to 733 order fills over multi-year horizon.",
+    "3. High Rebalance Frequency: Weekly rebalancing re-optimizes noise 52 times per year vs 12 times per year for monthly.",
+    "4. Boundary Corner Hopping: Two banking stocks (HDFCBANK, ICICIBANK) repeatedly hit 40% sector cap, causing solver to alternate allocations violently."
+  ]
+}

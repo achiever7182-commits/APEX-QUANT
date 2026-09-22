@@ -254,6 +254,7 @@ class PaperTradingOrchestrator:
         override_volumes: Optional[Dict[str, float]] = None,
         allocation_method: str = "constrained",
         force_market_open: bool = False,
+        disable_synthetic_fallback: bool = False,
     ) -> CycleResult:
         """
         Execute one complete quantitative paper trading cycle:
@@ -396,6 +397,8 @@ class PaperTradingOrchestrator:
             if dfs:
                 candidate_panel = pd.concat(dfs, ignore_index=True)
             else:
+                if disable_synthetic_fallback:
+                    raise RuntimeError("Strict mode enabled: No realtime feature data available. Synthetic fallback is disabled.")
                 # Fallback synthetic panel for testing
                 rows = []
                 for i, sym in enumerate(eligible_stocks):

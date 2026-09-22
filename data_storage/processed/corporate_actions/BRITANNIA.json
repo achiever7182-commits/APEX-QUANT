@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "BRITANNIA",
+    "ex_date": "2022-06-20",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 56.5,
+    "details": "Dividend: \u20b956.5"
+  },
+  {
+    "symbol": "BRITANNIA",
+    "ex_date": "2023-04-13",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 72.0,
+    "details": "Dividend: \u20b972.0"
+  },
+  {
+    "symbol": "BRITANNIA",
+    "ex_date": "2024-08-05",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 73.5,
+    "details": "Dividend: \u20b973.5"
+  },
+  {
+    "symbol": "BRITANNIA",
+    "ex_date": "2025-08-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 75.0,
+    "details": "Dividend: \u20b975.0"
+  },
+  {
+    "symbol": "BRITANNIA",
+    "ex_date": "2026-07-31",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 90.5,
+    "details": "Dividend: \u20b990.5"
+  }
+]

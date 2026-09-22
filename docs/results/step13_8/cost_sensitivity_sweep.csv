@@ -1,0 +1,5 @@
+strategy,0_bps_return_pct,0_bps_sharpe,0_bps_costs_inr,10_bps_return_pct,10_bps_sharpe,10_bps_costs_inr,20_bps_return_pct,20_bps_sharpe,20_bps_costs_inr,30_bps_return_pct,30_bps_sharpe,30_bps_costs_inr,50_bps_return_pct,50_bps_sharpe,50_bps_costs_inr,return_drag_0_to_50_pct,survives_50_bps
+Variant A (Constrained Weekly Unpenalized),56.36,0.446,0.0,25.28,0.06,287830.55,0.28,-0.324,513301.5,-19.54,-0.698,689750.03,-48.38,-1.425,931606.02,104.74,False
+Variant B (Turnover-Penalized Weekly),36.94,0.247,0.0,27.84,0.078,90601.04,18.84,-0.099,174277.42,9.86,-0.29,251150.83,-6.01,-0.663,387059.85,42.95,False
+Variant E (Turnover-Penalized Monthly + Deadband),72.99,0.769,0.0,69.14,0.717,35449.96,64.18,0.648,69762.14,60.46,0.596,103449.26,52.21,0.475,167693.66,20.78,True
+Benchmark: Equal Weight Monthly,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,False

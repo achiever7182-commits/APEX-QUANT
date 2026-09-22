@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "HINDALCO",
+    "ex_date": "2022-08-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.0,
+    "details": "Dividend: \u20b94.0"
+  },
+  {
+    "symbol": "HINDALCO",
+    "ex_date": "2023-08-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.0,
+    "details": "Dividend: \u20b93.0"
+  },
+  {
+    "symbol": "HINDALCO",
+    "ex_date": "2024-08-09",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.5,
+    "details": "Dividend: \u20b93.5"
+  },
+  {
+    "symbol": "HINDALCO",
+    "ex_date": "2025-08-08",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.0,
+    "details": "Dividend: \u20b95.0"
+  },
+  {
+    "symbol": "HINDALCO",
+    "ex_date": "2026-07-10",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.0,
+    "details": "Dividend: \u20b95.0"
+  }
+]

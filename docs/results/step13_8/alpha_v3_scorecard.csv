@@ -1,0 +1,25 @@
+strategy,period,start_date,end_date,total_return_pct,trading_cagr_pct,annualized_vol_pct,sharpe_ratio,sortino_ratio,max_drawdown_pct,turnover_x,total_costs_inr,closed_trades,win_rate_pct,profit_factor
+Benchmark: Equal Weight Broader Monthly,Baseline (Frozen),2023-06-01,2024-04-30,0.0,0.0,0.0,0.0,-15.875,0.0,0.0,0.0,0,0.0,0.0
+Benchmark: Equal Weight Broader Weekly,Baseline (Frozen),2023-06-01,2024-04-30,0.0,0.0,0.0,0.0,-15.875,0.0,0.0,0.0,0,0.0,0.0
+Benchmark: Equal Weight 5-Stock Weekly,Baseline (Frozen),2023-06-01,2024-04-30,13.97,15.93,10.94,0.817,1.23,8.06,0.81,2416.46,91,78.0,13.566
+Variant A: Constrained Weekly (Unpenalized),Baseline (Frozen),2023-06-01,2024-04-30,30.26,34.82,14.89,1.654,2.523,5.54,24.3,81105.49,303,56.8,1.738
+Variant B: Turnover-Penalized Weekly (gamma=1.0),Baseline (Frozen),2023-06-01,2024-04-30,22.13,25.35,9.88,1.69,2.431,3.83,8.28,27125.89,175,57.1,2.57
+Variant C: Constrained Monthly (Unpenalized),Baseline (Frozen),2023-06-01,2024-04-30,35.8,41.31,15.69,1.879,2.837,7.49,6.93,23891.34,65,64.6,3.806
+Variant D: Turnover-Penalized Monthly (gamma=1.0),Baseline (Frozen),2023-06-01,2024-04-30,20.79,23.79,11.72,1.333,1.993,6.93,3.85,12556.4,69,56.5,4.75
+Variant E: Turnover-Penalized Monthly + Deadband,Baseline (Frozen),2023-06-01,2024-04-30,20.54,23.51,11.11,1.38,2.099,5.86,3.63,11770.53,40,67.5,5.572
+Benchmark: Equal Weight Broader Monthly,Extended OOS,2024-05-01,2026-09-16,0.0,0.0,0.0,0.0,-15.875,0.0,0.0,0.0,0,0.0,0.0
+Benchmark: Equal Weight Broader Weekly,Extended OOS,2024-05-01,2026-09-16,0.0,0.0,0.0,0.0,-15.875,0.0,0.0,0.0,0,0.0,0.0
+Benchmark: Equal Weight 5-Stock Weekly,Extended OOS,2024-05-01,2026-09-16,26.81,10.62,21.22,0.269,0.584,20.77,1.73,6173.48,361,62.3,1.092
+Variant A: Constrained Weekly (Unpenalized),Extended OOS,2024-05-01,2026-09-16,-16.81,-7.52,16.57,-0.782,-1.032,25.92,75.09,217363.95,863,45.3,0.794
+Variant B: Turnover-Penalized Weekly (gamma=1.0),Extended OOS,2024-05-01,2026-09-16,8.11,3.37,12.03,-0.204,-0.275,16.75,25.94,86474.96,440,53.6,1.046
+Variant C: Constrained Monthly (Unpenalized),Extended OOS,2024-05-01,2026-09-16,34.78,13.52,17.44,0.443,0.66,14.57,20.11,76127.62,201,55.7,1.206
+Variant D: Turnover-Penalized Monthly (gamma=1.0),Extended OOS,2024-05-01,2026-09-16,41.09,15.75,12.87,0.697,1.175,7.26,8.43,31584.04,121,62.8,2.174
+Variant E: Turnover-Penalized Monthly + Deadband,Extended OOS,2024-05-01,2026-09-16,41.39,15.86,13.15,0.692,1.166,7.28,8.14,30537.58,73,65.8,2.333
+Benchmark: Equal Weight Broader Monthly,Full Multi-Year,2023-01-01,2026-09-16,0.0,0.0,0.0,0.0,-15.875,0.0,0.0,0.0,0,0.0,0.0
+Benchmark: Equal Weight Broader Weekly,Full Multi-Year,2023-01-01,2026-09-16,0.0,0.0,0.0,0.0,-15.875,0.0,0.0,0.0,0,0.0,0.0
+Benchmark: Equal Weight 5-Stock Weekly,Full Multi-Year,2023-01-01,2026-09-16,43.11,10.34,18.34,0.269,0.541,20.79,2.27,8279.06,594,62.8,1.979
+Variant A: Constrained Weekly (Unpenalized),Full Multi-Year,2023-01-01,2026-09-16,12.02,3.17,15.85,-0.134,-0.182,25.94,111.22,407498.36,1340,49.5,0.974
+Variant B: Turnover-Penalized Weekly (gamma=1.0),Full Multi-Year,2023-01-01,2026-09-16,19.5,5.01,12.18,-0.07,-0.095,16.75,37.98,131810.67,692,55.1,1.122
+Variant C: Constrained Monthly (Unpenalized),Full Multi-Year,2023-01-01,2026-09-16,88.95,19.09,16.4,0.752,1.124,14.6,30.37,141213.17,317,58.7,1.487
+Variant D: Turnover-Penalized Monthly (gamma=1.0),Full Multi-Year,2023-01-01,2026-09-16,67.45,15.2,12.04,0.697,1.119,7.3,14.07,55053.71,224,61.2,2.277
+Variant E: Turnover-Penalized Monthly + Deadband,Full Multi-Year,2023-01-01,2026-09-16,66.92,15.1,12.09,0.687,1.111,7.28,13.53,52805.64,138,63.0,2.402

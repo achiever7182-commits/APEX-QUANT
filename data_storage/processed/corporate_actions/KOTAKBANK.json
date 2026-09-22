@@ -1,0 +1,56 @@
+[
+  {
+    "symbol": "KOTAKBANK",
+    "ex_date": "2022-08-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.22,
+    "details": "Dividend: \u20b90.22"
+  },
+  {
+    "symbol": "KOTAKBANK",
+    "ex_date": "2023-08-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.3,
+    "details": "Dividend: \u20b90.3"
+  },
+  {
+    "symbol": "KOTAKBANK",
+    "ex_date": "2024-07-19",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.4,
+    "details": "Dividend: \u20b90.4"
+  },
+  {
+    "symbol": "KOTAKBANK",
+    "ex_date": "2025-07-18",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.5,
+    "details": "Dividend: \u20b90.5"
+  },
+  {
+    "symbol": "KOTAKBANK",
+    "ex_date": "2026-01-14",
+    "action_type": "SPLIT",
+    "ratio_numerator": 5.0,
+    "ratio_denominator": 1.0,
+    "value": 0.0,
+    "details": "Split ratio: 5:1"
+  },
+  {
+    "symbol": "KOTAKBANK",
+    "ex_date": "2026-07-17",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.65,
+    "details": "Dividend: \u20b90.65"
+  }
+]

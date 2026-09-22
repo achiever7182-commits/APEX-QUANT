@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "SBIN",
+    "ex_date": "2022-05-25",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.1,
+    "details": "Dividend: \u20b97.1"
+  },
+  {
+    "symbol": "SBIN",
+    "ex_date": "2023-05-31",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 11.3,
+    "details": "Dividend: \u20b911.3"
+  },
+  {
+    "symbol": "SBIN",
+    "ex_date": "2024-05-22",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 13.7,
+    "details": "Dividend: \u20b913.7"
+  },
+  {
+    "symbol": "SBIN",
+    "ex_date": "2025-05-16",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 15.9,
+    "details": "Dividend: \u20b915.9"
+  },
+  {
+    "symbol": "SBIN",
+    "ex_date": "2026-05-15",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 17.35,
+    "details": "Dividend: \u20b917.35"
+  }
+]

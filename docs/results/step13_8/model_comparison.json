@@ -1,0 +1,44 @@
+{
+  "models": [
+    {
+      "model": "Model A (Ridge ML)",
+      "evaluation_period": "Extended OOS (2024-05-01 to 2026-09-16)",
+      "mean_cross_sectional_ic": 0.0147,
+      "ic_ir": 0.085,
+      "mean_rank_ic": 0.0127,
+      "rank_ic_ir": 0.0733,
+      "directional_accuracy_pct": 50.11,
+      "observations": 118
+    },
+    {
+      "model": "Model B (Momentum Baseline)",
+      "evaluation_period": "Extended OOS (2024-05-01 to 2026-09-16)",
+      "mean_cross_sectional_ic": 0.0016,
+      "ic_ir": 0.0072,
+      "mean_rank_ic": -0.002,
+      "rank_ic_ir": -0.0093,
+      "directional_accuracy_pct": 49.82,
+      "observations": 118
+    },
+    {
+      "model": "Model C (Naive Baseline)",
+      "evaluation_period": "Extended OOS (2024-05-01 to 2026-09-16)",
+      "mean_cross_sectional_ic": -0.0008,
+      "ic_ir": -0.0055,
+      "mean_rank_ic": -0.0105,
+      "rank_ic_ir": -0.072,
+      "directional_accuracy_pct": 49.4,
+      "observations": 118
+    },
+    {
+      "model": "Model D (Sector-Neutral Momentum)",
+      "evaluation_period": "Extended OOS (2024-05-01 to 2026-09-16)",
+      "mean_cross_sectional_ic": -0.0171,
+      "ic_ir": -0.0975,
+      "mean_rank_ic": -0.0209,
+      "rank_ic_ir": -0.1294,
+      "directional_accuracy_pct": 49.98,
+      "observations": 118
+    }
+  ]
+}

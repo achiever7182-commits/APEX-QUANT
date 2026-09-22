@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "M&M",
+    "ex_date": "2022-07-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 11.55,
+    "details": "Dividend: \u20b911.55"
+  },
+  {
+    "symbol": "M&M",
+    "ex_date": "2023-07-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 16.25,
+    "details": "Dividend: \u20b916.25"
+  },
+  {
+    "symbol": "M&M",
+    "ex_date": "2024-07-05",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 21.1,
+    "details": "Dividend: \u20b921.1"
+  },
+  {
+    "symbol": "M&M",
+    "ex_date": "2025-07-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 25.3,
+    "details": "Dividend: \u20b925.3"
+  },
+  {
+    "symbol": "M&M",
+    "ex_date": "2026-07-03",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 33.0,
+    "details": "Dividend: \u20b933.0"
+  }
+]

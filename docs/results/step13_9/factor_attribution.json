@@ -1,0 +1,16 @@
+{
+  "strategy": "Variant E (Turnover-Penalized Monthly + Deadband)",
+  "market_benchmark": "Equal Weight Broader Universe Monthly",
+  "period": "Full Multi-Year (2023-01-01 to 2026-09-16)",
+  "observations_trading_days": 918,
+  "market_beta": 0.354,
+  "annualized_alpha_pct": 1.04,
+  "alpha_t_statistic": 0.002,
+  "alpha_p_value": 0.0,
+  "r_squared": 0.2248,
+  "correlation": 0.4741,
+  "annualized_tracking_error_pct": 15.51,
+  "information_ratio": -0.854,
+  "valid_regression": true,
+  "interpretation": "Positive active alpha after accounting for market exposure"
+}

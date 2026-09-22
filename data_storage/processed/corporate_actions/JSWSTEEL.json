@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "JSWSTEEL",
+    "ex_date": "2022-07-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 17.35,
+    "details": "Dividend: \u20b917.35"
+  },
+  {
+    "symbol": "JSWSTEEL",
+    "ex_date": "2023-07-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.4,
+    "details": "Dividend: \u20b93.4"
+  },
+  {
+    "symbol": "JSWSTEEL",
+    "ex_date": "2024-07-09",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.3,
+    "details": "Dividend: \u20b97.3"
+  },
+  {
+    "symbol": "JSWSTEEL",
+    "ex_date": "2025-07-08",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 2.8,
+    "details": "Dividend: \u20b92.8"
+  },
+  {
+    "symbol": "JSWSTEEL",
+    "ex_date": "2026-07-07",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.1,
+    "details": "Dividend: \u20b97.1"
+  }
+]

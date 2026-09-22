@@ -1,0 +1,20 @@
+[
+  {
+    "symbol": "JIOFIN",
+    "ex_date": "2025-08-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.5,
+    "details": "Dividend: \u20b90.5"
+  },
+  {
+    "symbol": "JIOFIN",
+    "ex_date": "2026-08-10",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 0.6,
+    "details": "Dividend: \u20b90.6"
+  }
+]

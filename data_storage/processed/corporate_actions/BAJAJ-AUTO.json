@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "BAJAJ-AUTO",
+    "ex_date": "2022-06-30",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 140.0,
+    "details": "Dividend: \u20b9140.0"
+  },
+  {
+    "symbol": "BAJAJ-AUTO",
+    "ex_date": "2023-06-30",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 140.0,
+    "details": "Dividend: \u20b9140.0"
+  },
+  {
+    "symbol": "BAJAJ-AUTO",
+    "ex_date": "2024-06-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 80.0,
+    "details": "Dividend: \u20b980.0"
+  },
+  {
+    "symbol": "BAJAJ-AUTO",
+    "ex_date": "2025-06-20",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 210.0,
+    "details": "Dividend: \u20b9210.0"
+  },
+  {
+    "symbol": "BAJAJ-AUTO",
+    "ex_date": "2026-05-29",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 150.0,
+    "details": "Dividend: \u20b9150.0"
+  }
+]

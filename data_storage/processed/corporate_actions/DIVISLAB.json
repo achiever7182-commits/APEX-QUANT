@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "DIVISLAB",
+    "ex_date": "2022-08-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 30.0,
+    "details": "Dividend: \u20b930.0"
+  },
+  {
+    "symbol": "DIVISLAB",
+    "ex_date": "2023-08-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 30.0,
+    "details": "Dividend: \u20b930.0"
+  },
+  {
+    "symbol": "DIVISLAB",
+    "ex_date": "2024-08-02",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 30.0,
+    "details": "Dividend: \u20b930.0"
+  },
+  {
+    "symbol": "DIVISLAB",
+    "ex_date": "2025-07-25",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 30.0,
+    "details": "Dividend: \u20b930.0"
+  },
+  {
+    "symbol": "DIVISLAB",
+    "ex_date": "2026-07-24",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 30.0,
+    "details": "Dividend: \u20b930.0"
+  }
+]

@@ -1,0 +1,112 @@
+{
+  "step": "13.8",
+  "project": "APEX-QUANT",
+  "timestamp": "2026-09-19T09:12:00Z",
+  "random_seed": 42,
+  "universe": {
+    "total_curated_catalog": 52,
+    "available_count": 48,
+    "unavailable_count": 4,
+    "available_symbols": [
+      "HDFCBANK",
+      "ICICIBANK",
+      "SBIN",
+      "KOTAKBANK",
+      "AXISBANK",
+      "BAJFINANCE",
+      "JIOFIN",
+      "TCS",
+      "INFY",
+      "HCLTECH",
+      "WIPRO",
+      "TECHM",
+      "RELIANCE",
+      "ONGC",
+      "BPCL",
+      "IOC",
+      "ITC",
+      "HINDUNILVR",
+      "NESTLEIND",
+      "BRITANNIA",
+      "TATACONSUM",
+      "TITAN",
+      "TRENT",
+      "MARUTI",
+      "M&M",
+      "BAJAJ-AUTO",
+      "EICHERMOT",
+      "SUNPHARMA",
+      "CIPLA",
+      "DRREDDY",
+      "DIVISLAB",
+      "APOLLOHOSP",
+      "LT",
+      "BEL",
+      "HAL",
+      "SIEMENS",
+      "TATASTEEL",
+      "JSWSTEEL",
+      "HINDALCO",
+      "GRASIM",
+      "ULTRACEMCO",
+      "NTPC",
+      "POWERGRID",
+      "COALINDIA",
+      "BHARTIARTL",
+      "ADANIPORTS",
+      "ADANIENT",
+      "YESBANK"
+    ],
+    "unavailable_symbols": [
+      "LTIM",
+      "TATAMOTORS",
+      "HDFCLTD",
+      "DHFL"
+    ],
+    "synthetic_bars": 0
+  },
+  "evaluation_periods": {
+    "baseline_period": {
+      "start": "2023-06-01",
+      "end": "2024-04-30",
+      "status": "FROZEN_CALIBRATION"
+    },
+    "extended_oos_period": {
+      "start": "2024-05-01",
+      "end": "2026-09-16",
+      "status": "STRICT_OOS_HOLDOUT"
+    },
+    "full_multi_year_period": {
+      "start": "2023-01-01",
+      "end": "2026-09-16",
+      "status": "FULL_MULTI_YEAR"
+    }
+  },
+  "optimizer_configuration": {
+    "active_optimizer": "TurnoverPenalizedOptimizer",
+    "gamma_turnover": 1.0,
+    "deadband_threshold": 0.025,
+    "max_positions": 15,
+    "min_positions": 5,
+    "max_single_stock_weight": 0.15,
+    "max_sector_weight": 0.35,
+    "gross_exposure_limit": 0.95,
+    "cash_buffer_minimum": 0.05
+  },
+  "cost_model": {
+    "baseline_transaction_cost_bps": 10.0,
+    "baseline_slippage_bps": 5.0,
+    "sensitivity_friction_levels_bps": [
+      0.0,
+      10.0,
+      20.0,
+      30.0,
+      50.0
+    ]
+  },
+  "live_trading_safety": {
+    "live_trading_disabled": true,
+    "broker_network_calls_blocked": true,
+    "paper_trading_isolated": true
+  }
+}

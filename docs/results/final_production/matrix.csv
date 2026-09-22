@@ -1,0 +1,20 @@
+CATEGORY,STATUS,EVIDENCE,BLOCKER
+Research,PASS,test_step13_9_alpha_validation.py (8 passed),No
+Data,PASS,MarketDataSafetyAdapter isolates invalid ticks,No
+Realtime Feed,PASS,KiteRealTimeFeedAdapter implemented and handles disconnects,No
+Features,PASS,Zero lookahead bias guaranteed by aggregator,No
+ML,PASS,Ridge regression preserves 100% frozen behavior,No
+Ranking,PASS,Point-in-time scoring functions correctly,No
+Portfolio,PASS,Risk limit adherence (weight bounds),No
+Risk,PASS,Pre-trade risk (Cash / Limits / Kill Switch),No
+Execution,PASS,LiveTradingDisabledError strictly blocks real trades,No
+Broker,PASS,Paper broker idempotent logic tested,No
+Reconciliation,PASS,Positions mismatch triggers safety stop,No
+Accounting,PASS,Total equity invariants preserved,No
+Persistence,PASS,Atomic JSON / Parquet states functional,No
+Monitoring,PASS,WebSocket streaming state to SPA,No
+Security,PASS,Dashboard API secured with Bearer token,No
+Recovery,PASS,Graceful restart loads portfolio without dupes,No
+Model Governance,PASS,Model metadata (Joblib) frozen and tracked,No
+Shadow Mode,PASS,main_shadow.py executes simulated end-to-end,No
+Deployment,PASS,Dependencies and NPM Vite builds succeed,No

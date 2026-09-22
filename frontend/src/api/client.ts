@@ -56,6 +56,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 export const api = {
   // Paper Trading & Portfolio
   getAccountSummary: () => request<AccountSummary>("/api/paper/summary"),
+  getPortfolio: () => request<any>("/api/paper/portfolio"),
   getPositions: () => request<Position[]>("/api/paper/positions"),
   getOrders: () => request<Order[]>("/api/paper/orders"),
   getFills: () => request<Fill[]>("/api/paper/fills"),

@@ -1,0 +1,8 @@
+strategy,return_pct,cagr_trading_pct,cagr_calendar_pct,volatility_pct,sharpe_rf6_5,sortino,max_dd_pct,turnover,total_costs
+Cash Benchmark,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Buy & Hold (5-Stock),14.67,16.73,16.2,12.46,0.787,1.19,9.48,0.0,0.0
+Rebalanced Equal Weight (No friction),15.21,17.35,16.8,12.41,0.833,1.258,9.37,0.0,0.0
+Strategy: Equal Weight,14.8,16.88,16.34,11.72,0.841,1.269,8.57,0.88,2755.82
+Strategy: Score Weighted,14.0,15.96,15.46,11.96,0.76,1.127,9.28,5.35,17117.43
+Strategy: Inverse Volatility,6.41,7.27,7.05,11.09,0.105,0.154,8.15,8.89,27871.03
+Strategy: Constrained,14.36,16.38,15.86,10.21,0.907,1.372,6.77,13.92,44959.99

@@ -1,0 +1,137 @@
+[
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2021-12-22",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.25,
+    "details": "Dividend: \u20b95.25"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2022-02-16",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.125,
+    "details": "Dividend: \u20b94.125"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2022-08-19",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.6875,
+    "details": "Dividend: \u20b91.6875"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2022-11-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.75,
+    "details": "Dividend: \u20b93.75"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2023-02-08",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.75,
+    "details": "Dividend: \u20b93.75"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2023-08-08",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.5625,
+    "details": "Dividend: \u20b93.5625"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2023-09-12",
+    "action_type": "SPLIT",
+    "ratio_numerator": 4.0,
+    "ratio_denominator": 3.0,
+    "value": 0.0,
+    "details": "Split ratio: 4:3"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2023-11-16",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.0,
+    "details": "Dividend: \u20b94.0"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2024-02-15",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.5,
+    "details": "Dividend: \u20b94.5"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2024-08-16",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 2.75,
+    "details": "Dividend: \u20b92.75"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2024-11-14",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.5,
+    "details": "Dividend: \u20b94.5"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2025-02-07",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.25,
+    "details": "Dividend: \u20b93.25"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2025-08-19",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.25,
+    "details": "Dividend: \u20b91.25"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2025-11-10",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.5,
+    "details": "Dividend: \u20b94.5"
+  },
+  {
+    "symbol": "POWERGRID",
+    "ex_date": "2026-02-09",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.25,
+    "details": "Dividend: \u20b93.25"
+  }
+]

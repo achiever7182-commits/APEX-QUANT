@@ -1,0 +1,119 @@
+[
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2021-10-26",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.5,
+    "details": "Dividend: \u20b95.5"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2022-04-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.5,
+    "details": "Dividend: \u20b94.5"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2022-10-31",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 6.0,
+    "details": "Dividend: \u20b96.0"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2023-04-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.1,
+    "details": "Dividend: \u20b95.1"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2023-11-01",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.0,
+    "details": "Dividend: \u20b97.0"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2024-01-05",
+    "action_type": "SPLIT",
+    "ratio_numerator": 10.0,
+    "ratio_denominator": 1.0,
+    "value": 0.0,
+    "details": "Split ratio: 10:1"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2024-02-15",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.5,
+    "details": "Dividend: \u20b93.5"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2024-07-16",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.625,
+    "details": "Dividend: \u20b95.625"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2025-02-07",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.125,
+    "details": "Dividend: \u20b97.125"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2025-07-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.0,
+    "details": "Dividend: \u20b95.0"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2025-08-08",
+    "action_type": "SPLIT",
+    "ratio_numerator": 2.0,
+    "ratio_denominator": 1.0,
+    "value": 0.0,
+    "details": "Split ratio: 2:1"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2026-02-06",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.0,
+    "details": "Dividend: \u20b97.0"
+  },
+  {
+    "symbol": "NESTLEIND",
+    "ex_date": "2026-07-10",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 7.0,
+    "details": "Dividend: \u20b97.0"
+  }
+]

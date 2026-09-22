@@ -26,6 +26,7 @@ if _PROJECT_ROOT not in sys.path:
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_socketio import SocketIO
+from functools import wraps
 
 from config import DASHBOARD_HOST, DASHBOARD_PORT, SYMBOL
 
@@ -48,6 +49,30 @@ _state_lock = threading.Lock()
 _bot_proc: subprocess.Popen | None = None
 _bot_logs: deque[str] = deque(maxlen=200)
 _bot_proc_lock = threading.Lock()
+
+
+def require_api_auth(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"status": "error", "message": "Missing Authorization header"}), 401
+        
+        expected_token = os.environ.get("DASHBOARD_API_TOKEN")
+        if not expected_token:
+            return jsonify({"status": "error", "message": "Server authentication not configured"}), 500
+            
+        if not token.startswith("Bearer "):
+            return jsonify({"status": "error", "message": "Invalid Authorization header format"}), 401
+            
+        if token[7:] != expected_token:
+            return jsonify({"status": "error", "message": "Unauthorized"}), 403
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+
 
 
 def _load_initial_state() -> None:
@@ -258,14 +283,20 @@ def _serve_spa_or_fallback():
 @app.route("/")
 @app.route("/dashboard")
 @app.route("/market")
+@app.route("/signals")
 @app.route("/scanner")
 @app.route("/stock/<path:symbol>")
 @app.route("/portfolio")
+@app.route("/positions")
 @app.route("/orders")
 @app.route("/strategies")
+@app.route("/backtests")
 @app.route("/backtest")
+@app.route("/models")
+@app.route("/data")
 @app.route("/risk")
 @app.route("/system")
+@app.route("/settings")
 @app.route("/reconciliation")
 @app.route("/architecture")
 @app.route("/paper-terminal")
@@ -383,6 +414,7 @@ def api_paper_summary():
 
 
 @app.route("/api/paper/positions")
+@require_api_auth
 def api_paper_positions():
     """Return active paper positions."""
     try:
@@ -395,6 +427,7 @@ def api_paper_positions():
 
 
 @app.route("/api/paper/orders")
+@require_api_auth
 def api_paper_orders():
     """Return paper orders."""
     try:
@@ -407,6 +440,7 @@ def api_paper_orders():
 
 
 @app.route("/api/paper/fills")
+@require_api_auth
 def api_paper_fills():
     """Return paper fills."""
     try:
@@ -419,6 +453,7 @@ def api_paper_fills():
 
 
 @app.route("/api/paper/kill_switch", methods=["GET", "POST"])
+@require_api_auth
 def api_paper_kill_switch():
     """Get status or toggle persistent kill switch."""
     try:
@@ -473,6 +508,7 @@ def api_paper_signals():
 
 
 @app.route("/api/paper/portfolio")
+@require_api_auth
 def api_paper_portfolio():
     """Return latest portfolio decisions and current vs target allocations."""
     try:
@@ -498,6 +534,7 @@ def api_paper_portfolio():
 
 
 @app.route("/api/paper/reconciliation")
+@require_api_auth
 def api_paper_reconciliation():
     """Return latest post-trade reconciliation audit report."""
     try:

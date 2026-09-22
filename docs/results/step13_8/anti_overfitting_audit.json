@@ -1,0 +1,12 @@
+{
+  "cutoff_timestamp": "2024-01-15T00:00:00Z",
+  "future_data_mutation_tested": "Multiplied close, open, high, low by 10.0 after cutoff",
+  "max_discrepancy_pre_cutoff": 0.0,
+  "zero_lookahead_passed": true,
+  "point_in_time_guarantees": {
+    "features_use_only_past_data": true,
+    "target_horizon_strict_cutoff": "t + horizon <= T",
+    "model_training_never_sees_future": true,
+    "expanding_window_strictly_chronological": true
+  }
+}

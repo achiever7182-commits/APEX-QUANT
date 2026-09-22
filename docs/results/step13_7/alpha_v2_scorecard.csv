@@ -1,0 +1,25 @@
+variant,universe,period,start_date,end_date,return_pct,cagr_trading_pct,cagr_calendar_pct,sharpe_rf6_5,sortino,max_dd_pct,turnover,total_costs,executed_fills,closed_trades,win_rate_pct,profit_factor
+Variant A: Constrained Weekly (Baseline),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,13.89,15.83,15.33,0.868,1.305,6.62,14.0,45081.42,188,138,59.4,1.687
+"Variant B: Turnover-Penalized Weekly (gamma=1.0, cap=20%)",5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,12.5,14.23,13.79,0.764,1.195,5.96,0.66,2008.11,89,59,91.5,123.601
+Variant C: Constrained Monthly (1ME),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,13.42,15.3,14.82,0.769,1.222,5.81,4.16,13103.6,44,23,78.3,3.648
+Variant D: Signal Persistence / Deadband (tau=2.5%),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,13.97,15.92,15.42,0.874,1.315,6.59,13.88,44777.76,154,107,59.8,1.697
+Variant E: Turnover-Penalized + Deadband (Monthly),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,12.19,13.88,13.44,0.656,1.019,6.18,0.36,1082.94,3,1,100.0,999.0
+Variant E2: Turnover-Penalized + Deadband (Weekly),5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,12.37,14.09,13.65,0.687,1.068,6.0,0.38,1125.03,4,2,100.0,999.0
+Benchmark: Equal Weight Weekly,5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,14.8,16.88,16.34,0.841,1.269,8.57,0.88,2755.82,213,99,78.8,11.693
+Benchmark: Equal Weight Monthly,5-stock empirical benchmark,Baseline (Frozen),2023-06-01,2024-04-30,14.79,16.87,16.34,0.84,1.268,8.66,0.61,1873.71,52,21,85.7,13.675
+Variant A: Constrained Weekly (Baseline),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,-9.37,-4.09,-4.06,-0.295,-0.685,31.93,36.94,113827.65,494,365,38.6,0.515
+"Variant B: Turnover-Penalized Weekly (gamma=1.0, cap=20%)",5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,16.73,6.79,6.74,0.076,0.142,16.5,1.56,5303.82,317,201,60.7,1.412
+Variant C: Constrained Monthly (1ME),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,31.9,12.49,12.39,0.307,0.838,23.23,11.69,46330.87,127,86,41.9,0.535
+Variant D: Signal Persistence / Deadband (tau=2.5%),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,-9.19,-4.01,-3.98,-0.292,-0.678,31.84,36.56,112927.75,382,274,38.3,0.515
+Variant E: Turnover-Penalized + Deadband (Monthly),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,26.44,10.48,10.4,0.254,0.623,15.94,0.56,1807.41,6,3,66.7,1.079
+Variant E2: Turnover-Penalized + Deadband (Weekly),5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,18.04,7.3,7.25,0.107,0.199,14.11,0.87,2868.58,11,6,83.3,1.038
+Benchmark: Equal Weight Weekly,5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,27.52,10.88,10.8,0.277,0.589,22.24,1.91,7411.24,579,402,59.7,0.959
+Benchmark: Equal Weight Monthly,5-stock empirical benchmark,Extended OOS (2024-2026),2024-05-01,2026-09-16,26.72,10.59,10.5,0.266,0.558,21.96,1.19,4289.47,135,78,62.8,1.559
+Variant A: Constrained Weekly (Baseline),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,-5.25,-1.47,-1.45,-0.263,-0.562,31.92,52.99,167495.59,757,562,43.6,0.637
+"Variant B: Turnover-Penalized Weekly (gamma=1.0, cap=20%)",5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,21.14,5.4,5.32,0.029,0.076,23.49,2.32,8656.54,417,315,52.4,1.033
+Variant C: Constrained Monthly (1ME),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,42.79,10.27,10.1,0.242,0.611,23.24,16.66,65345.25,180,123,49.6,0.657
+Variant D: Signal Persistence / Deadband (tau=2.5%),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,-4.99,-1.4,-1.37,-0.26,-0.555,31.84,52.37,166139.39,571,406,42.9,0.638
+Variant E: Turnover-Penalized + Deadband (Monthly),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,35.97,8.8,8.65,0.201,0.475,11.81,0.33,1083.93,6,4,100.0,999.0
+Variant E2: Turnover-Penalized + Deadband (Weekly),5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,34.77,8.54,8.39,0.201,0.407,8.84,0.28,1157.77,5,3,66.7,268.149
+Benchmark: Equal Weight Weekly,5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,44.62,10.66,10.48,0.28,0.553,22.27,2.48,9994.08,874,681,64.9,1.663
+Benchmark: Equal Weight Monthly,5-stock empirical benchmark,Full Multi-Year (2023-2026),2023-01-01,2026-09-16,43.79,10.48,10.31,0.273,0.533,22.0,1.43,5423.17,214,131,68.7,4.358

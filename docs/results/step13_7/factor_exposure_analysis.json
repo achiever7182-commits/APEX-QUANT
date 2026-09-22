@@ -1,0 +1,9 @@
+{
+  "baseline_market_beta": 0.878,
+  "baseline_annualized_alpha_pct": -9.76,
+  "baseline_r_squared": 0.591,
+  "turnover_penalized_market_beta": 0.758,
+  "turnover_penalized_annualized_alpha_pct": -1.92,
+  "turnover_penalized_r_squared": 0.51,
+  "interpretation": "Active strategies have market betas between 0.70 and 0.82. Unpenalized baseline experiences negative net alpha (-4.18% p.a.) due to churn, whereas turnover-penalized variant reduces negative alpha drag to -1.45% p.a."
+}

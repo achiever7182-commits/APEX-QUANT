@@ -1,0 +1,8 @@
+total_friction_bps,fee_bps,slippage_bps,return_pct,cagr_pct,sharpe,max_dd_pct,total_costs,is_above_cash,is_above_risk_free
+0.0,0.0,0.0,19.18,21.93,1.358,6.25,0.0,True,True
+5.0,3.3,1.7,17.56,20.06,1.21,6.42,15187.23,True,True
+10.0,6.7,3.3,15.93,18.18,1.057,6.61,30162.87,True,True
+15.0,10.0,5.0,14.36,16.38,0.907,6.77,44959.99,True,True
+25.0,16.7,8.3,11.26,12.81,0.602,7.12,73875.74,True,True
+50.0,33.3,16.7,3.78,4.28,-0.173,7.96,142926.98,True,False
+75.0,50.0,25.0,-3.18,-3.59,-0.932,9.75,207111.22,False,False

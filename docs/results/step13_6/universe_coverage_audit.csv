@@ -1,0 +1,53 @@
+symbol,company_name,sector,status,bar_count,start_date,end_date
+HDFCBANK,HDFC Bank Limited,Financial Services,AVAILABLE,1241,2021-09-16,2026-09-16
+ICICIBANK,ICICI Bank Limited,Financial Services,AVAILABLE,1241,2021-09-16,2026-09-16
+TCS,Tata Consultancy Services Limited,Information Technology,AVAILABLE,1241,2021-09-16,2026-09-16
+INFY,Infosys Limited,Information Technology,AVAILABLE,1241,2021-09-16,2026-09-16
+RELIANCE,Reliance Industries Limited,Energy,AVAILABLE,1241,2021-09-16,2026-09-16
+SBIN,State Bank of India,Financial Services,UNAVAILABLE,0,N/A,N/A
+KOTAKBANK,Kotak Mahindra Bank Limited,Financial Services,UNAVAILABLE,0,N/A,N/A
+AXISBANK,Axis Bank Limited,Financial Services,UNAVAILABLE,0,N/A,N/A
+BAJFINANCE,Bajaj Finance Limited,Financial Services,UNAVAILABLE,0,N/A,N/A
+JIOFIN,Jio Financial Services Limited,Financial Services,UNAVAILABLE,0,N/A,N/A
+HCLTECH,HCL Technologies Limited,Information Technology,UNAVAILABLE,0,N/A,N/A
+WIPRO,Wipro Limited,Information Technology,UNAVAILABLE,0,N/A,N/A
+TECHM,Tech Mahindra Limited,Information Technology,UNAVAILABLE,0,N/A,N/A
+LTIM,LTIMindtree Limited,Information Technology,UNAVAILABLE,0,N/A,N/A
+ONGC,Oil and Natural Gas Corporation Limited,Energy,UNAVAILABLE,0,N/A,N/A
+BPCL,Bharat Petroleum Corporation Limited,Energy,UNAVAILABLE,0,N/A,N/A
+IOC,Indian Oil Corporation Limited,Energy,UNAVAILABLE,0,N/A,N/A
+ITC,ITC Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+HINDUNILVR,Hindustan Unilever Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+NESTLEIND,Nestle India Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+BRITANNIA,Britannia Industries Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+TATACONSUM,Tata Consumer Products Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+TITAN,Titan Company Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+TRENT,Trent Limited,Consumer Goods,UNAVAILABLE,0,N/A,N/A
+TATAMOTORS,Tata Motors Limited,Automobile,UNAVAILABLE,0,N/A,N/A
+MARUTI,Maruti Suzuki India Limited,Automobile,UNAVAILABLE,0,N/A,N/A
+M&M,Mahindra & Mahindra Limited,Automobile,UNAVAILABLE,0,N/A,N/A
+BAJAJ-AUTO,Bajaj Auto Limited,Automobile,UNAVAILABLE,0,N/A,N/A
+EICHERMOT,Eicher Motors Limited,Automobile,UNAVAILABLE,0,N/A,N/A
+SUNPHARMA,Sun Pharmaceutical Industries Limited,Healthcare,UNAVAILABLE,0,N/A,N/A
+CIPLA,Cipla Limited,Healthcare,UNAVAILABLE,0,N/A,N/A
+DRREDDY,Dr. Reddy's Laboratories Limited,Healthcare,UNAVAILABLE,0,N/A,N/A
+DIVISLAB,Divi's Laboratories Limited,Healthcare,UNAVAILABLE,0,N/A,N/A
+APOLLOHOSP,Apollo Hospitals Enterprise Limited,Healthcare,UNAVAILABLE,0,N/A,N/A
+LT,Larsen & Toubro Limited,Industrials,UNAVAILABLE,0,N/A,N/A
+BEL,Bharat Electronics Limited,Industrials,UNAVAILABLE,0,N/A,N/A
+HAL,Hindustan Aeronautics Limited,Industrials,UNAVAILABLE,0,N/A,N/A
+SIEMENS,Siemens Limited,Industrials,UNAVAILABLE,0,N/A,N/A
+TATASTEEL,Tata Steel Limited,Materials,UNAVAILABLE,0,N/A,N/A
+JSWSTEEL,JSW Steel Limited,Materials,UNAVAILABLE,0,N/A,N/A
+HINDALCO,Hindalco Industries Limited,Materials,UNAVAILABLE,0,N/A,N/A
+GRASIM,Grasim Industries Limited,Materials,UNAVAILABLE,0,N/A,N/A
+ULTRACEMCO,UltraTech Cement Limited,Materials,UNAVAILABLE,0,N/A,N/A
+NTPC,NTPC Limited,Utilities,UNAVAILABLE,0,N/A,N/A
+POWERGRID,Power Grid Corporation of India Limited,Utilities,UNAVAILABLE,0,N/A,N/A
+COALINDIA,Coal India Limited,Utilities,UNAVAILABLE,0,N/A,N/A
+BHARTIARTL,Bharti Airtel Limited,Communication Services,UNAVAILABLE,0,N/A,N/A
+ADANIPORTS,Adani Ports and Special Economic Zone Limited,Industrials,UNAVAILABLE,0,N/A,N/A
+ADANIENT,Adani Enterprises Limited,Materials,UNAVAILABLE,0,N/A,N/A
+HDFCLTD,Housing Development Finance Corporation Limited,Financial Services,UNAVAILABLE,0,N/A,N/A
+YESBANK,Yes Bank Limited,Financial Services,UNAVAILABLE,0,N/A,N/A
+DHFL,Dewan Housing Finance Corporation Limited,Financial Services,UNAVAILABLE,0,N/A,N/A

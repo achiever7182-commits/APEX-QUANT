@@ -1,0 +1,16 @@
+period,strategy,benchmark,strategy_return_pct,benchmark_return_pct,strategy_cagr_pct,benchmark_cagr_pct,strategy_sharpe,benchmark_sharpe,strategy_max_drawdown_pct,benchmark_max_drawdown_pct,excess_return_pct,strategy_turnover_x,benchmark_turnover_x,strategy_costs_inr,benchmark_costs_inr
+Baseline (Frozen),Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight Broader Monthly,21.06,68.22,24.1,79.99,1.418,2.575,5.87,4.22,-47.16,3.84,0.8,12040.06,2803.91
+Baseline (Frozen),Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight Broader Weekly,21.06,70.18,24.1,82.37,1.418,2.64,5.87,4.23,-49.13,3.84,1.12,12040.06,4104.17
+Baseline (Frozen),Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight 5-Stock Weekly,21.06,14.8,24.1,16.88,1.418,0.841,5.87,8.57,6.26,3.84,0.88,12040.06,2755.82
+Baseline (Frozen),Variant E: Turnover-Penalized Monthly + Deadband,Simple Momentum Baseline Monthly,21.06,128.97,24.1,155.01,1.418,1.642,5.87,4.68,-107.91,3.84,6.7,12040.06,28614.77
+Baseline (Frozen),Variant E: Turnover-Penalized Monthly + Deadband,Naive Baseline Monthly,21.06,129.86,24.1,156.14,1.418,1.665,5.87,4.93,-108.8,3.84,6.56,12040.06,28505.1
+Extended OOS,Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight Broader Monthly,65.11,49.79,23.75,18.73,0.689,0.755,8.23,11.25,15.32,7.84,1.29,31069.3,4762.16
+Extended OOS,Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight Broader Weekly,65.11,49.39,23.75,18.6,0.689,0.751,8.23,11.36,15.72,7.84,2.13,31069.3,7980.66
+Extended OOS,Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight 5-Stock Weekly,65.11,27.52,23.75,10.88,0.689,0.277,8.23,22.24,37.59,7.84,1.91,31069.3,7411.24
+Extended OOS,Variant E: Turnover-Penalized Monthly + Deadband,Simple Momentum Baseline Monthly,65.11,34.78,23.75,13.52,0.689,0.377,8.23,14.46,30.33,7.84,18.57,31069.3,66189.02
+Extended OOS,Variant E: Turnover-Penalized Monthly + Deadband,Naive Baseline Monthly,65.11,25.23,23.75,10.03,0.689,0.242,8.23,19.48,39.88,7.84,18.0,31069.3,60071.47
+Full Multi-Year,Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight Broader Monthly,70.18,169.75,15.71,31.31,0.707,1.316,8.17,11.52,-99.58,13.77,1.75,52663.93,9274.42
+Full Multi-Year,Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight Broader Weekly,70.18,172.5,15.71,31.68,0.707,1.333,8.17,11.63,-102.33,13.77,2.94,52663.93,16461.56
+Full Multi-Year,Variant E: Turnover-Penalized Monthly + Deadband,Equal Weight 5-Stock Weekly,70.18,44.62,15.71,10.66,0.707,0.28,8.17,22.27,25.56,13.77,2.48,52663.93,9994.08
+Full Multi-Year,Variant E: Turnover-Penalized Monthly + Deadband,Simple Momentum Baseline Monthly,70.18,234.78,15.71,39.33,0.707,0.886,8.17,14.66,-164.61,13.77,29.0,52663.93,208025.09
+Full Multi-Year,Variant E: Turnover-Penalized Monthly + Deadband,Naive Baseline Monthly,70.18,199.6,15.71,35.15,0.707,0.813,8.17,19.93,-129.42,13.77,28.06,52663.93,185030.98

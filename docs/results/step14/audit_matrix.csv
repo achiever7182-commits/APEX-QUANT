@@ -1,0 +1,14 @@
+CATEGORY,STATUS,BLOCKER
+Research Gate,PASS,No
+Market Data,BLOCKED,YES (Missing Real Feed)
+Features & ML,PASS,No
+Portfolio & Risk,PASS,No
+Execution & Broker,PASS,No
+Reconciliation,PASS,No
+Persistence,PASS,No
+Monitoring,PASS,No
+Security,BLOCKED,YES (Unauthenticated Kill Switch)
+Recovery,PASS,No
+Model Governance,PASS,No
+Shadow Mode,BLOCKED,YES (Missing Real Feed)
+Deployment,PASS,No

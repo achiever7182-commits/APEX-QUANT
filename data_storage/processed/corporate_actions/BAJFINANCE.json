@@ -1,0 +1,65 @@
+[
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2022-06-30",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 2.0,
+    "details": "Dividend: \u20b92.0"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2023-06-30",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.0,
+    "details": "Dividend: \u20b93.0"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2024-06-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.6,
+    "details": "Dividend: \u20b93.6"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2025-05-09",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 1.2,
+    "details": "Dividend: \u20b91.2"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2025-05-30",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.4,
+    "details": "Dividend: \u20b94.4"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2025-06-16",
+    "action_type": "SPLIT",
+    "ratio_numerator": 2.0,
+    "ratio_denominator": 1.0,
+    "value": 0.0,
+    "details": "Split ratio: 2:1"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "ex_date": "2026-06-30",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 6.0,
+    "details": "Dividend: \u20b96.0"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "factor_attributions": [
+    {
+      "strategy": "Variant B (Turnover-Penalized Weekly)",
+      "benchmark": "Equal Weight Broader Universe Monthly",
+      "period": "Full Multi-Year (2023-01-01 to 2026-09-16)",
+      "market_beta": NaN,
+      "annualized_alpha_pct": NaN,
+      "r_squared": NaN,
+      "correlation": NaN,
+      "p_value": NaN,
+      "interpretation": "Returns predominantly driven by passive market exposure / negative alpha after costs"
+    },
+    {
+      "strategy": "Variant E (Turnover-Penalized Monthly + Deadband)",
+      "benchmark": "Equal Weight Broader Universe Monthly",
+      "period": "Full Multi-Year (2023-01-01 to 2026-09-16)",
+      "market_beta": NaN,
+      "annualized_alpha_pct": NaN,
+      "r_squared": NaN,
+      "correlation": NaN,
+      "p_value": NaN,
+      "interpretation": "Returns predominantly driven by passive market exposure / negative alpha after costs"
+    },
+    {
+      "strategy": "5-Stock Equal Weight Baseline",
+      "benchmark": "Equal Weight Broader Universe Monthly",
+      "period": "Full Multi-Year (2023-01-01 to 2026-09-16)",
+      "market_beta": NaN,
+      "annualized_alpha_pct": NaN,
+      "r_squared": NaN,
+      "correlation": NaN,
+      "p_value": NaN,
+      "interpretation": "Returns predominantly driven by passive market exposure / negative alpha after costs"
+    }
+  ]
+}

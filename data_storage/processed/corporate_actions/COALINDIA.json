@@ -1,0 +1,155 @@
+[
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2021-12-06",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 9.0,
+    "details": "Dividend: \u20b99.0"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2022-02-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.0,
+    "details": "Dividend: \u20b95.0"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2022-08-11",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 3.0,
+    "details": "Dividend: \u20b93.0"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2022-11-15",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 15.0,
+    "details": "Dividend: \u20b915.0"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2023-02-08",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.25,
+    "details": "Dividend: \u20b95.25"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2023-08-18",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 4.0,
+    "details": "Dividend: \u20b94.0"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2023-11-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 15.25,
+    "details": "Dividend: \u20b915.25"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2024-02-20",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.25,
+    "details": "Dividend: \u20b95.25"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2024-08-16",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.0,
+    "details": "Dividend: \u20b95.0"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2024-11-05",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 15.75,
+    "details": "Dividend: \u20b915.75"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2025-01-31",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.6,
+    "details": "Dividend: \u20b95.6"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2025-08-06",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.5,
+    "details": "Dividend: \u20b95.5"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2025-08-21",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.15,
+    "details": "Dividend: \u20b95.15"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2025-11-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 10.25,
+    "details": "Dividend: \u20b910.25"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2026-02-18",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.5,
+    "details": "Dividend: \u20b95.5"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2026-07-31",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.5,
+    "details": "Dividend: \u20b95.5"
+  },
+  {
+    "symbol": "COALINDIA",
+    "ex_date": "2026-09-04",
+    "action_type": "DIVIDEND",
+    "ratio_numerator": 1.0,
+    "ratio_denominator": 1.0,
+    "value": 5.25,
+    "details": "Dividend: \u20b95.25"
+  }
+]
